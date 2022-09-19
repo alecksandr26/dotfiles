@@ -185,7 +185,7 @@ bar {
         status_command i3status
 }
 
-bindsym $mod+Control+l exec i3lock -c -00000
+bindsym $mod+Control+l exec i3lock -c 000000
 
 for_window [class="^.*"] border pixel 0
 
@@ -194,8 +194,9 @@ bindsym $mod+Ctrl+less move workspace to output left
 
 bindsym $mod+Ctrl+e exec thunar
 
-exec feh --bg-scale /home/alecksandr/Pictures/Wallpapers/arch.jpg
-
 bindsym --release $mod+Print exec scrot 'ArcoLinux-%Y-%m-%d-%H-%s_screenshot.png' -s -e 'xclip -selection clipboard -t image/png -i $f && rm *.png'
 
 bindsym $mod+Ctrl+space exec (setxkbmap -query | grep -q "layout:\s\+us") && setxkbmap -layout latam || setxkbmap us
+
+
+exec feh --bg-scale /home/alecksandr/Pictures/Wallpapers/mark-koch.jpg
