@@ -8,7 +8,7 @@
  '(menu-bar-mode nil)
  '(menu-prompting nil)
  '(package-selected-packages
-   '(company-irony elpy company-c-headers flycheck magit vterm cython-mode multi-vterm projectile iedit yasnippet-snippets yasnippet auto-complete-c-headers auto-complete company))
+   '(auctex company-irony elpy company-c-headers flycheck magit vterm cython-mode multi-vterm projectile iedit yasnippet-snippets yasnippet auto-complete-c-headers auto-complete company))
  '(scroll-bar-mode nil)
  '(tab-width 4)
  '(tool-bar-mode nil))
@@ -66,6 +66,8 @@
 ;; add MELPA to repository list
 (add-to-list 'package-archives
              '("melpa" . "https://melpa.org/packages/") t)
+
+
 ;; initialize package.el
 (package-initialize)
 
@@ -115,6 +117,8 @@
 (add-to-list 'company-backends 'company-c-headers)
 (add-to-list 'company-c-headers-path-system "/usr/include/")
 (add-to-list 'company-c-headers-path-system "/usr/include/c++/12.2.0/")
+(add-to-list 'company-c-headers-path-system "/usr/i686-w64-mingw32/include/")
+
 
 ;; Snippets
 (require 'yasnippet)

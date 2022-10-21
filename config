@@ -195,8 +195,11 @@ bindsym $mod+Ctrl+less move workspace to output left
 bindsym $mod+Ctrl+e exec thunar
 
 bindsym --release $mod+Print exec scrot 'ArcoLinux-%Y-%m-%d-%H-%s_screenshot.png' -s -e 'xclip -selection clipboard -t image/png -i $f && rm *.png'
+bindsym --release Print exec scrot 'ArcoLinux-%Y-%m-%d-%H-%s_screenshot.png' -s -e 'mv *.png ~/Pictures/'
 
 bindsym $mod+Ctrl+space exec (setxkbmap -query | grep -q "layout:\s\+us") && setxkbmap -layout latam || setxkbmap us
 
-
 exec feh --bg-scale /home/alecksandr/Pictures/Wallpapers/mark-koch.jpg
+
+# To be able to do zoom install booomer
+bindsym $mod+z exec boomer
