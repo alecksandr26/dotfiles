@@ -8,14 +8,13 @@
  '(menu-bar-mode nil)
  '(menu-prompting nil)
  '(package-selected-packages
-   '(auctex company-irony elpy company-c-headers flycheck magit vterm cython-mode multi-vterm projectile iedit yasnippet-snippets yasnippet auto-complete-c-headers auto-complete company))
+   '(fixmee neotree sql-indent auctex company-irony elpy company-c-headers flycheck magit vterm cython-mode multi-vterm projectile iedit yasnippet-snippets yasnippet auto-complete-c-headers auto-complete company))
  '(scroll-bar-mode nil)
  '(tab-width 4)
  '(tool-bar-mode nil))
 
 ;; To hide the started screen of emacs
 (setq inhibit-startup-screen t)
-
 
 (defun fontify-frame (frame)
   (set-frame-parameter frame 'font "Source Code Pro SemiBold-10"))
@@ -25,10 +24,8 @@
 (push 'fontify-frame after-make-frame-functions)
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
 
-
 ;; To make more slower the mouse scroll
 (setq mouse-wheel-progressive-speed nil)
-
 
 ;; To manipulate the idetnation
 (setq-default indent-tabs-mode nil)
@@ -41,7 +38,6 @@
 (setq sgml-basic-offset 4)
 (setq python-indent-guess-indent-offset t)
 (setq python-indent-guess-indent-offset-verbose nil)
-
 
 ;; Desactivate the backup files
 (setq make-backup-files nil)
@@ -67,7 +63,6 @@
 (add-to-list 'package-archives
              '("melpa" . "https://melpa.org/packages/") t)
 
-
 ;; initialize package.el
 (package-initialize)
 
@@ -81,7 +76,6 @@
 
 ;; To run flycheck
 (add-hook 'after-init-hook 'global-flycheck-mode)
-
 
 ;; To start auto completeheaders
 ;; (require 'auto-complete)
@@ -147,8 +141,6 @@
 
 (global-set-key (kbd "M-z") 'tab-indent-or-complete)
 
-
-
 ;; Enable elpy
 (elpy-enable)
 
@@ -160,3 +152,12 @@
 ;; To make a shortcut
 (global-set-key [f5] 'compile)
 
+;; To eneable the neotree
+(add-to-list 'load-path "/some/path/neotree")
+(require 'neotree)
+(global-set-key [f8] 'neotree-toggle)
+
+;; To start fixmee
+(require 'fixmee)
+(require 'button-lock)
+(global-fixmee-mode 1)
