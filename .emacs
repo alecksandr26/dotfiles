@@ -8,7 +8,7 @@
  '(menu-bar-mode nil)
  '(menu-prompting nil)
  '(package-selected-packages
-   '(fixmee neotree sql-indent auctex company-irony elpy company-c-headers flycheck magit vterm cython-mode multi-vterm projectile iedit yasnippet-snippets yasnippet auto-complete-c-headers auto-complete company))
+   '(pdf-tools fixmee neotree sql-indent auctex company-irony elpy company-c-headers flycheck magit vterm cython-mode multi-vterm projectile iedit yasnippet-snippets yasnippet auto-complete-c-headers auto-complete company))
  '(scroll-bar-mode nil)
  '(tab-width 4)
  '(tool-bar-mode nil))
@@ -161,3 +161,19 @@
 (require 'fixmee)
 (require 'button-lock)
 (global-fixmee-mode 1)
+
+
+;; To enable pdf-tools and auct
+(pdf-tools-install)
+(custom-set-variables
+;; ...
+'(TeX-view-program-selection
+   '(((output-dvi has-no-display-manager)
+      "dvi2tty")
+     ((output-dvi style-pstricks)
+      "dvips and gv")
+     (output-dvi "xdvi")
+     (output-pdf "PDF Tools")
+     (output-html "xdg-open")))
+ ;; ...
+  )
