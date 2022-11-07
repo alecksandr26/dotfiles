@@ -143,6 +143,7 @@
 
 ;; Enable elpy
 (elpy-enable)
+(add-hook 'elpy-mode-hook (lambda () (highlight-indentation-mode -1)))
 
 ;; Enable Flycheck with elpy
 (when (require 'flycheck nil t)
@@ -166,8 +167,7 @@
 ;; To enable pdf-tools and auct
 (pdf-tools-install)
 (custom-set-variables
-;; ...
-'(TeX-view-program-selection
+ '(TeX-view-program-selection
    '(((output-dvi has-no-display-manager)
       "dvi2tty")
      ((output-dvi style-pstricks)
@@ -175,5 +175,11 @@
      (output-dvi "xdvi")
      (output-pdf "PDF Tools")
      (output-html "xdg-open")))
- ;; ...
+ )
+
+;; To enable the column of numbers in tex files
+(defun my-display-numbers-hook ()
+  (display-line-numbers-mode 1)
   )
+(add-hook 'prog-mode-hook 'my-display-numbers-hook)
+(add-hook 'text-mode-hook 'my-display-numbers-hook)
