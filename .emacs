@@ -19,7 +19,6 @@
  '(menu-prompting nil)
  '(package-selected-packages
    '(impatient-mode pdf-tools fixmee neotree sql-indent auctex company-irony elpy company-c-headers flycheck magit vterm cython-mode multi-vterm projectile iedit yasnippet-snippets yasnippet auto-complete-c-headers auto-complete company))
- '(scroll-bar-mode nil)
  '(tab-width 4)
  '(tool-bar-mode nil))
 
@@ -111,10 +110,9 @@
 ;; (add-hook 'c++-mode-hook 'my:ac-c-headers-init)
 ;; (add-hook 'c-mode-hook 'my:ac-c-headers-ini)
 
+;; To active company
 (require 'company)
 (require 'company-c-headers)
-
-;; To active company
 (add-hook 'after-init-hook 'global-company-mode)
 
 ;; To active compnay c headers
