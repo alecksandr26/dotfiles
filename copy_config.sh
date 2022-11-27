@@ -7,7 +7,7 @@ paths_of_config_files=(
 	"$HOME/.config/Thunar/uca.xml"
 	"$HOME/.emacs"
 	"$HOME/.xinitrc"
-	"/etc/vimrc"
+	"$HOME/.vimrc"
 )
 
 dict_files["alacritty.yml"]="$HOME/.config/alacritty/alacritty.yml"
@@ -15,7 +15,7 @@ dict_files["config"]="$HOME/.config/i3/config"
 dict_files["uca.xml"]="$HOME/.config/Thunar/uca.xml"
 dict_files[".emacs"]="$HOME/.emacs"
 dict_files[".xinitrc"]="$HOME/.xinitrc"
-dict_files["vimrc"]="/etc/vimrc"
+dict_files["vimrc"]="$HOME/.vimrc"
 
 current_files=( $(ls -a .) )
 
