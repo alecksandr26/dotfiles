@@ -329,3 +329,14 @@
             limit custom-font-lock-doc-comments)))))
 
 (setq-default c-doc-comment-style (quote (custom)))
+
+;; To be able to run webkit you need to install org-mode
+;; https://git.savannah.gnu.org/git/emacs/org-mode.git
+(add-to-list 'load-path (concat user-emacs-directory "org-mode/lisp/"))
+(require 'org)
+
+
+;; include emacs-webkit
+;; https://github.com/akirakyle/emacs-webkit
+(add-to-list 'load-path (concat user-emacs-directory "emacs-webkit/"))
+(require 'webkit)
