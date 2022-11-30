@@ -340,3 +340,7 @@
 ;; https://github.com/akirakyle/emacs-webkit
 (add-to-list 'load-path (concat user-emacs-directory "emacs-webkit/"))
 (require 'webkit)
+
+;; To run project tile
+(projectile-mode +1)
+(define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
