@@ -34,7 +34,7 @@
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
 
 ;; To make more slower the mouse scroll
-(setq mouse-wheel-progressive-speed nil)
+;;(setq mouse-wheel-progressive-speed nil)
 
 ;; To manipulate the idetnation
 (setq-default indent-tabs-mode nil)
