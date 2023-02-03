@@ -121,7 +121,6 @@
 (add-to-list 'company-c-headers-path-system "/usr/include/c++/12.2.0/")
 (add-to-list 'company-c-headers-path-system "/usr/i686-w64-mingw32/include/")
 
-
 ;; Snippets
 (require 'yasnippet)
 (yas-global-mode 1)
@@ -158,8 +157,9 @@
   (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
   (add-hook 'elpy-mode-hook 'flycheck-mode))
 
-;; My Shortcut
-(global-set-key [f5] 'compile)
+;; My Shortcuts
+(global-set-key [f5] 'compile)          ; To compile the code
+(global-set-key (kbd "C-c C-f") 'display-buffer-other-frame) ; To open a new frame
 
 ;; To eneable the neotree
 (add-to-list 'load-path "/some/path/neotree")
