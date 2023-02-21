@@ -344,3 +344,17 @@
 ;; To run project tile
 (projectile-mode +1)
 (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
+
+;; To run the eaf 
+(add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework/")
+(require 'eaf)
+(require 'eaf-file-browser)
+(require 'eaf-file-manager)
+(require 'eaf-markdown-previewer)
+(require 'eaf-camera)
+(require 'eaf-browser)
+(require 'eaf-org-previewer)
+(require 'eaf-music-player)
+(require 'eaf-video-player)
+(require 'eaf-image-viewer)
+(require 'eaf-pdf-viewer)
