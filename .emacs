@@ -75,13 +75,18 @@
 ;; initialize package.el
 (package-initialize)
 
-
 ;; Adding vterm
 (add-to-list 'load-path "~/.emacs.d/emacs-libvterm")
 (require 'vterm)
 
 ;; To run the iedit
 (global-set-key (kbd "C-c ;") 'iedit-mode)
+
+(add-hook 'asm-mode-hook
+          (lambda () (local-set-key (kbd "C-c ;") 'iedit-mode)))
+
+;;(eval-after-load 'asm-mode
+;;  '(define-key LaTeX-mode-map (kbd "C-c ;") 'iedit-mode))
 
 ;; To run flycheck
 (add-hook 'after-init-hook 'global-flycheck-mode)
@@ -174,7 +179,6 @@
 
 ;; To enable pdf-tools and auct
 (pdf-tools-install)
-
 
 ;; To enable the column of numbers in tex files
 (defun my-display-numbers-hook ()
@@ -348,13 +352,13 @@
 ;; To run the eaf 
 (add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework/")
 (require 'eaf)
-(require 'eaf-file-browser)
-(require 'eaf-file-manager)
 (require 'eaf-markdown-previewer)
 (require 'eaf-camera)
 (require 'eaf-browser)
+(require 'eaf-file-browser)
 (require 'eaf-org-previewer)
 (require 'eaf-music-player)
 (require 'eaf-video-player)
 (require 'eaf-image-viewer)
-(require 'eaf-pdf-viewer)
+
+(eaf-setq eaf-browser-enable-adblocker "true")
