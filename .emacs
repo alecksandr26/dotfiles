@@ -18,12 +18,11 @@
  '(menu-bar-mode nil)
  '(menu-prompting nil)
  '(package-selected-packages
-   '(impatient-mode pdf-tools fixmee neotree sql-indent auctex company-irony elpy company-c-headers flycheck magit vterm cython-mode multi-vterm projectile iedit yasnippet-snippets yasnippet auto-complete-c-headers auto-complete company))
- '(tab-width 4)
+   '(sublimity impatient-mode pdf-tools fixmee neotree sql-indent auctex company-irony elpy company-c-headers flycheck magit vterm cython-mode multi-vterm projectile iedit yasnippet-snippets yasnippet auto-complete-c-headers auto-complete company))
  '(tool-bar-mode nil))
 
 ;; To hide the started screen of emacs
-(setq inhibit-startup-screen t)
+;; (setq inhibit-startup-screen t)
 
 (defun fontify-frame (frame)
   (set-frame-parameter frame 'font "Source Code Pro SemiBold-10"))
@@ -37,27 +36,43 @@
 ;;(setq mouse-wheel-progressive-speed nil)
 
 ;; To manipulate the idetnation
-(setq-default indent-tabs-mode nil)
-(setq-default tab-width 4) ; Assuming you want your tabs to be four spaces wide
+(setq-default indent-tabs-mode t)
+(setq-default tab-width 8) ; Assuming you want your tabs to be four spaces wide
 
 (defvaralias 'c-basic-offset 'tab-width)
-(setq c-guess-make-basic-offset t)
-(setq c-guess-guessed-basic-offset-verbose nil)
-(setq js-indent-level 4)
-(setq sgml-basic-offset 4)
+;(setq c-guess-make-basic-offset t)
+;(setq c-guess-guessed-basic-offset-verbose nil)
+
+;; (smart-tabs-insinuate 'c 'javascript)
+(setq backward-delete-char-untabify-method 'hungry)
+;; (setq backward-delete-char-untabify-method 'all)
+
+(setq js-indent-level 'tab-width)
+(setq sgml-basic-offset 'tab-width)
 (setq python-indent-guess-indent-offset t)
 (setq python-indent-guess-indent-offset-verbose nil)
+
+(setq verilog-indent-level 'tab-width)           ; Verilog
+(setq verilog-indent-level-module 'tab-width)
+(setq verilog-indent-level-declaration 'tab-width)
+(setq verilog-indent-level-directive 'tab-width)
+(setq verilog-indent-level-behavioral 'tab-width)
 
 ;; Desactivate the backup files
 (setq make-backup-files nil)
 (setq auto-save-default nil) ; stop creating #autosave# files
 (put 'erase-buffer 'disabled nil)
-(custom-set-faces
+
+;; (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(scroll-bar ((t (:foreground "gray3")))))
+;; '(scroll-bar ((t (:foreground "gray3")))))
+
+;; disable scrollbars
+;; (customize-set-variable 'scroll-bar-mode nil)
+;; (customize-set-variable 'horizontal-scroll-bar-mode nil)
 
 ;; Load the monokai theme
 (add-to-list 'custom-theme-load-path "~/.emacs.d/themes/")
@@ -362,3 +377,15 @@
 (require 'eaf-image-viewer)
 
 (eaf-setq eaf-browser-enable-adblocker "true")
+
+(require 'sublimity)
+(require 'sublimity-scroll)
+;; (require 'sublimity-map) ;; experimental
+(require 'sublimity-attractive)
+(sublimity-mode 1)
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
