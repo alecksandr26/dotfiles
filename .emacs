@@ -18,7 +18,7 @@
  '(menu-bar-mode nil)
  '(menu-prompting nil)
  '(package-selected-packages
-   '(sublimity impatient-mode pdf-tools fixmee neotree sql-indent auctex company-irony elpy company-c-headers flycheck magit vterm cython-mode multi-vterm projectile iedit yasnippet-snippets yasnippet auto-complete-c-headers auto-complete company))
+   '(ac-html sublimity impatient-mode pdf-tools fixmee neotree sql-indent auctex company-irony elpy company-c-headers flycheck magit vterm cython-mode multi-vterm projectile iedit yasnippet-snippets yasnippet auto-complete-c-headers auto-complete company))
  '(tool-bar-mode nil))
 
 ;; To hide the started screen of emacs
@@ -48,7 +48,7 @@
 ;; (setq backward-delete-char-untabify-method 'all)
 
 (setq js-indent-level 'tab-width)
-(setq sgml-basic-offset 'tab-width)
+(setq sgml-basic-offset 4)		; 4 spaces
 (setq python-indent-guess-indent-offset t)
 (setq python-indent-guess-indent-offset-verbose nil)
 
@@ -204,11 +204,15 @@
 
 
 ;; Fortran 90 config
+
+(setq f90-program-indent 4)
 (setq f90-do-indent 4)
 (setq f90-if-indent 4)
 (setq f90-type-indent 4)
-(setq f90-program-indent 4)
+(setq f90-associate-indent 4)
+(setq f90-critical-indent 4)
 (setq f90-continuation-indent 4)
+
 (setq f90-smart-end 'blink)
 
 (add-hook 'f90-mode-hook
@@ -389,3 +393,23 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+
+
+(defun setup-ac-for-haml ()
+  ;; Require ac-haml since we are setup haml auto completion
+  (require 'ac-haml)
+  ;; Require default data provider if you want to use
+  (require 'ac-html-default-data-provider)
+  ;; Enable data providers,
+  ;; currently only default data provider available
+  (ac-html-enable-data-provider 'ac-html-default-data-provider)
+  ;; Let ac-haml do some setup
+  (ac-haml-setup)
+  ;; Set your ac-source
+  (setq ac-sources '(ac-source-haml-tag
+                     ac-source-haml-attr
+                     ac-source-haml-attrv))
+  ;; Enable auto complete mode
+  (auto-complete-mode))
+
+(add-hook 'haml-mode-hook 'setup-ac-for-haml)
