@@ -18,7 +18,7 @@
  '(menu-bar-mode nil)
  '(menu-prompting nil)
  '(package-selected-packages
-   '(ac-html sublimity impatient-mode pdf-tools fixmee neotree sql-indent auctex company-irony elpy company-c-headers flycheck magit vterm cython-mode multi-vterm projectile iedit yasnippet-snippets yasnippet auto-complete-c-headers auto-complete company))
+   '(sublimity ac-html impatient-mode pdf-tools fixmee neotree sql-indent auctex company-irony elpy company-c-headers flycheck magit vterm cython-mode multi-vterm projectile iedit yasnippet-snippets yasnippet auto-complete-c-headers auto-complete company))
  '(tool-bar-mode nil))
 
 ;; To hide the started screen of emacs
@@ -382,10 +382,10 @@
 
 (eaf-setq eaf-browser-enable-adblocker "true")
 
-(require 'sublimity)
+;; (require 'sublimity)
 (require 'sublimity-scroll)
 ;; (require 'sublimity-map) ;; experimental
-(require 'sublimity-attractive)
+;; (require 'sublimity-attractive)
 (sublimity-mode 1)
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
