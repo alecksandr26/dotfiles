@@ -4,8 +4,10 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(flycheck-clang-include-path '("/usr/include/freetype2"))
+ '(flycheck-gfortran-args '("-cpp" "-std=f2018" "-fall-intrinsics"))
+ '(flycheck-gfortran-include-path '("/usr/include/"))
  '(package-selected-packages
-   '(flycheck-rust rust-mode flycheck-crystal crystal-mode iedit magit flycheck company)))
+   '(multiple-cursors cmake-mode rjsx-mode flycheck-rust rust-mode flycheck-crystal crystal-mode iedit magit flycheck company)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -46,6 +48,8 @@
 (add-to-list 'package-archives
              '("melpa" . "https://melpa.org/packages/") t)
 
+(add-to-list 'load-path "~/.emacs.d/lisp/")
+
 ;; initialize package.el
 (package-initialize)
 
@@ -60,7 +64,19 @@
 (global-set-key (kbd "C-c ;") 'iedit-mode)
 
 ;; My shortcuts
-(global-set-key [f5] 'compile)          ; To compile the code
+
+(defvar previous-shell-command nil
+  "Variable to store the previous shell command.")
+
+(defun async-shell-command-with-previous ()
+  "Run `async-shell-command` with the previously used command, if any."
+  (interactive)
+  (let ((command (read-shell-command "Shell command: " previous-shell-command)))
+    (setq previous-shell-command command)
+    (async-shell-command command)))
+
+(global-set-key [f5] 'compile)
+(global-set-key [f6] 'async-shell-command-with-previous)
 (global-set-key (kbd "C-c C-f") 'display-buffer-other-frame) ; To open a new frame
 
 ;; For crystal
@@ -72,5 +88,33 @@
 
 (with-eval-after-load 'rust-mode
   (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
+
+
+;; To have iedit in fortran
+(add-hook 'f90-mode-hook
+          (lambda ()
+            ;; Use default global binding for M-f and M-b.
+            (local-set-key (kbd "C-c ;") 'iedit-mode)))
+
+(add-hook 'fortran-mode-hook
+          (lambda ()
+            ;; Use default global binding for M-f and M-b.
+            (local-set-key (kbd "C-c ;") 'iedit-mode)))
+
+
+;; Run the aucte
+(add-hook 'latex-mode-hook
+          (lambda ()
+            (display-line-numbers-mode)
+            (flycheck-mode -1)))
+
+;; TO have multiple cursors
+(require 'multiple-cursors)
+
+(global-set-key (kbd "C-S-c C-S-c") 'mc/edit-lines)
+(global-set-key (kbd "C->") 'mc/mark-next-like-this)
+(global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
+(global-set-key (kbd "C-c C-<") 'mc/mark-all-like-this)
+
 
 (message ".emacs loaded correctly")
