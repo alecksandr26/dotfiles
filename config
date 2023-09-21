@@ -203,3 +203,5 @@ exec feh --bg-scale /home/alecksandr/Pictures/Wallpapers/pexels-cottonbro-547395
 
 # To be able to do zoom install booomer
 bindsym $mod+z exec boomer
+
+bindsym $mod+Enter exec alacritty
