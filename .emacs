@@ -3,11 +3,8 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(flycheck-clang-include-path '("/usr/include/freetype2/"))
- '(flycheck-gfortran-args '("-cpp" "-std=f2018" "-fall-intrinsics"))
- '(flycheck-gfortran-include-path '("/usr/include/"))
  '(package-selected-packages
-   '(multiple-cursors cmake-mode rjsx-mode flycheck-rust rust-mode flycheck-crystal crystal-mode iedit magit flycheck company)))
+   '(company-c-headers multiple-cursors cmake-mode rjsx-mode rust-mode crystal-mode iedit magit company)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -60,7 +57,7 @@
 
 ;; Load flycheck
 ;; (add-hook 'after-init-hook 'global-flycheck-mode)
-(flycheck-mode 0)
+;; (flycheck-mode 0)
 
 ;; Tor un iedit
 (global-set-key (kbd "C-c ;") 'iedit-mode)
@@ -88,8 +85,8 @@
 (require 'rust-mode)
 ;; (require 'flycheck-rust)
 ;; (add-hook 'rust-mode-hook 'flycheck-mode)
-(with-eval-after-load 'rust-mode
-  (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
+;; (with-eval-after-load 'rust-mode
+;;   (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
 
 
 ;; ;; To have iedit in fortran
