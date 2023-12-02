@@ -3,7 +3,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(flycheck-clang-include-path '("/usr/include/freetype2"))
+ '(flycheck-clang-include-path '("/usr/include/freetype2/"))
  '(flycheck-gfortran-args '("-cpp" "-std=f2018" "-fall-intrinsics"))
  '(flycheck-gfortran-include-path '("/usr/include/"))
  '(package-selected-packages
@@ -23,6 +23,7 @@
 (menu-bar-mode -1)
 (scroll-bar-mode -1)
 (tool-bar-mode -1)
+
 
 ;; Remove backup files
 (setq make-backup-files nil)
@@ -58,13 +59,13 @@
 (add-hook 'after-init-hook 'global-company-mode)
 
 ;; Load flycheck
-(add-hook 'after-init-hook 'global-flycheck-mode)
+;; (add-hook 'after-init-hook 'global-flycheck-mode)
+(flycheck-mode 0)
 
 ;; Tor un iedit
 (global-set-key (kbd "C-c ;") 'iedit-mode)
 
 ;; My shortcuts
-
 (defvar previous-shell-command nil
   "Variable to store the previous shell command.")
 
@@ -80,41 +81,43 @@
 (global-set-key (kbd "C-c C-f") 'display-buffer-other-frame) ; To open a new frame
 
 ;; For crystal
-(require 'flycheck-crystal)
-(add-hook 'crystal-mode-hook 'flycheck-mode)
+;; (require 'flycheck-crystal)
+;; (add-hook 'crystal-mode-hook 'flycheck-mode)
 
+;; For running rust
+(require 'rust-mode)
 ;; (require 'flycheck-rust)
 ;; (add-hook 'rust-mode-hook 'flycheck-mode)
-
 (with-eval-after-load 'rust-mode
   (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
 
 
-;; To have iedit in fortran
-(add-hook 'f90-mode-hook
-          (lambda ()
-            ;; Use default global binding for M-f and M-b.
-            (local-set-key (kbd "C-c ;") 'iedit-mode)))
+;; ;; To have iedit in fortran
+;; (add-hook 'f90-mode-hook
+;;           (lambda ()
+;;             ;; Use default global binding for M-f and M-b.
+;;             (local-set-key (kbd "C-c ;") 'iedit-mode)))
 
-(add-hook 'fortran-mode-hook
-          (lambda ()
-            ;; Use default global binding for M-f and M-b.
-            (local-set-key (kbd "C-c ;") 'iedit-mode)))
+;; (add-hook 'fortran-mode-hook
+;;           (lambda ()
+;;             ;; Use default global binding for M-f and M-b.
+;;             (local-set-key (kbd "C-c ;") 'iedit-mode)))
 
 
-;; Run the aucte
-(add-hook 'latex-mode-hook
-          (lambda ()
-            (display-line-numbers-mode)
-            (flycheck-mode -1)))
+;; ;; Run the aucte
+;; (add-hook 'latex-mode-hook
+;;           (lambda ()
+;;             (display-line-numbers-mode)
+;;             (flycheck-mode -1)))
 
-;; TO have multiple cursors
-(require 'multiple-cursors)
+;; ;; TO have multiple cursors
+;; (require 'multiple-cursors)
 
-(global-set-key (kbd "C-S-c C-S-c") 'mc/edit-lines)
-(global-set-key (kbd "C->") 'mc/mark-next-like-this)
-(global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
-(global-set-key (kbd "C-c C-<") 'mc/mark-all-like-this)
+;; (global-set-key (kbd "C-S-c C-S-c") 'mc/edit-lines)
+;; (global-set-key (kbd "C->") 'mc/mark-next-like-this)
+;; (global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
+;; (global-set-key (kbd "C-c C-<") 'mc/mark-all-like-this)
 
 
 (message ".emacs loaded correctly")
+(put 'downcase-region 'disabled nil)
