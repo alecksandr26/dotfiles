@@ -12,7 +12,10 @@
 ;; Remove backup files
 ;; Config your backupfiles:
 ;; https://stackoverflow.com/questions/151945/how-do-i-control-how-emacs-makes-backup-files
-(setq make-backup-files nil)
+;; https://emacs.stackexchange.com/questions/33/put-all-backups-into-one-backup-folder
+(setq backup-directory-alist '(("." . "~/.emacs-backup")))
+(setq auto-save-file-name-transforms
+      `((".*" "~/.emacs-saves/" t)))
 
 ;; Add the column numbers
 (setq column-number-mode t)
@@ -62,6 +65,7 @@
 (defvaralias 'c-basic-offset 'tab-width)
 (setq backward-delete-char-untabify-method 'nil)
 
+;; dired
 ;; To add a new file to the current listed direcotry 
 (defun my-dired-add-file-here ()
   "Add a new file in the current directory in Dired mode."
@@ -71,13 +75,33 @@
 
 (global-set-key (kbd "C-+") 'my-dired-add-file-here)
 
-;; ido:
+;; ido
 ;; https://www.gnu.org/software/emacs/manual/html_mono/ido.html#Overview
 (require 'ido)
 (ido-mode t)
 
 ;; Enable electric-pair-mode for automatic insertion of matching parentheses
 (electric-pair-mode 1)
+
+;; Emacs as Deamon
+;; https://www.emacswiki.org/emacs/EmacsAsDaemon
+;; systemctl --user enable --now emacs
+;; systemctl --user start --now emacs
+;; check: https://unix.stackexchange.com/questions/56871/emacs-daemon-crashing-after-closing-emacsclient-c
+(setq default-frame-alist '((font . "Source Code Pro SemiBold-10")))
+(add-to-list 'default-frame-alist
+             '(vertical-scroll-bars . nil))
+
+;; Checking where Im running emacs
+(if (daemonp)
+    (message "Loading in the daemon!")
+    (message "Loading in regular Emacs!"))
+
+
+;; org mode
+;; My org mode configuration
+(require 'org)
+(setq org-format-latex-options (plist-put org-format-latex-options :scale 1.4))
 
 ;; -------------------------------------------------------------------------------------------
 ;; Initialized the package manager
@@ -94,14 +118,13 @@
  '(custom-safe-themes
    '("bf72d370fd0c2f47c632cd7314b1b9b7e0c79900c1947d0794ac2ecebb5ed584" default))
  '(package-selected-packages
-   '(multi-vterm vterm smex elpy cmake-mode cmake-ide rtags projectile hl-todo flycheck company fixmee magit multiple-cursors iedit)))
+   '(company-c-headers forth-mode slime-company slime company-auctex auctex yasnippet-snippets multi-vterm vterm smex elpy cmake-mode cmake-ide rtags projectile hl-todo flycheck company fixmee magit multiple-cursors iedit)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
-
 
 ;; -------------------------------------------------------------------------------------------
 ;; General package configs
@@ -112,6 +135,8 @@
 (add-hook 'after-init-hook 'global-company-mode)
 (setq company-idle-delay 0)
 (setq company-minimum-prefix-length 1)
+;; Remove company-capf becuase it doesn't works
+(setq company-backends (delete 'company-semantic (delete 'company-capf company-backends)))
 
 ;; magit
 ;; https://github.com/magit/magit/tree/2ed93504778c9ec2b8f56665cbdeae348146fbf7
@@ -120,8 +145,8 @@
 ;; magit-todos IS BROKEN... : (,  'try again in the future'
 ;; https://github.com/alphapapa/magit-todos/tree/debb77b3589f2d83c8b43706edc1f8f90bf1ad91
 
-;; flycheck
-;; https://github.com/flycheck/flycheck/tree/7ee95638c64821e9092a40af12b1095aa5604fa5
+;; ;; flycheck
+;; ;; https://github.com/flycheck/flycheck/tree/7ee95638c64821e9092a40af12b1095aa5604fa5
 (require 'flycheck)
 (add-hook 'after-init-hook 'global-flycheck-mode)
 
@@ -133,15 +158,33 @@
 (setq projectile-project-search-path '("~/Documents/projects/"))
 (projectile-mode +1)
 
-;; multiple-cursors
-;; https://github.com/magnars/multiple-cursors.el
+;; ;; multiple-cursors
+;; ;; https://github.com/magnars/multiple-cursors.el
 (require 'multiple-cursors)
 
-;; When you want to add multiple cursors not based on continuous lines,
-;; but based on keywords in the buffer, use:
+;; ;; When you want to add multiple cursors not based on continuous lines,
+;; ;; but based on keywords in the buffer, use:
 (global-set-key (kbd "C->") 'mc/mark-next-like-this)
 (global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
 (global-set-key (kbd "C-c C-<") 'mc/mark-all-like-this)
+
+;; ;; yasnippet
+;; ;; https://github.com/joaotavora/yasnippet
+(require 'yasnippet)
+(yas-reload-all)
+(add-hook 'prog-mode-hook #'yas-minor-mode)
+
+;; yasnippet-snippets
+;; https://github.com/AndreaCrotti/yasnippet-snippets
+
+;; ggtags, alternative to rtags
+;; https://elpa.gnu.org/packages/ggtags.html
+;; Download global here: https://www.gnu.org/software/global/
+(require 'ggtags)
+(add-hook 'c-mode-common-hook
+          (lambda ()
+            (when (derived-mode-p 'c-mode 'c++-mode 'java-mode 'asm-mode)
+              (ggtags-mode 1))))
 
 ;; iedit configuration
 ;; https://github.com/victorhge/iedit/tree/dd5d75b38ee0c52ad81245a8e5c932d3f5c4772d
@@ -185,7 +228,14 @@
 (add-hook 'after-init-hook 'global-hl-todo-mode)
 
 ;; -------------------------------------------------------------------------------------------
-;; My C/C++ Packges and Configs 
+;; My C/C++ Packges and Configs
+
+;; company-c-headers
+;; https://github.com/randomphrase/company-c-headers
+(require 'company-c-headers)
+(add-to-list 'company-backends 'company-c-headers)
+(add-to-list 'company-c-headers-path-system "/usr/include/")
+(add-to-list 'company-c-headers-path-system "/usr/include/c++/13.2.1/")
 
 ;; rtags
 ;; Install manually: https://github.com/Andersbakken/rtags#tldr-quickstart
@@ -204,15 +254,6 @@
 ;; https://melpa.org/#/cmake-mode
 ;; A simple highlighter for cmake files
 (require 'cmake-mode)
-
-;; Set the indentation style for multi-line function calls
-;; Set the indentation style for multi-line function calls in C modes
-(defun my-c-mode-common-hook ()
-  (c-set-offset 'arglist-close 0))
-
-(add-hook 'c-mode-common-hook 'my-c-mode-common-hook)
-(add-to-list 'c-offsets-alist '(arglist-close . c-lineup-close-paren))
-
 
 ;; -------------------------------------------------------------------------------------------
 ;; My Python Packages and Configs
@@ -247,6 +288,52 @@
             (setq python-indent-def-block-scale 1) ; Set the default indentation scale for blocks
             (setq python-indent-def-block-scale-default 1) ; Set the default indentation scale for blocks to 1
             (setq python-indent-first-label-offset -4))) ; Set the indentation offset for the first label
+
+;; -------------------------------------------------------------------------------------------
+;; My Latex Packages and Configs
+
+;; auctex
+;; https://elpa.gnu.org/packages/auctex.html
+(require 'auctex)
+
+;; company-auctex
+;; https://github.com/alexeyr/company-auctex/tree/9400a2ec7459dde8cbf1a5d50dfee4e300ed7e18
+(require 'company-auctex)
+(company-auctex-init)
+
+;; -------------------------------------------------------------------------------------------
+;; My Clisp Packages and Configs
+
+;; Install clisp and sbcl
+
+;; slime
+;; https://melpa.org/#/slime
+;; https://github.com/slime/slime
+(require 'slime)
+(setq inferior-lisp-program "sbcl")
+
+;; slime-company
+;; https://github.com/anwyn/slime-company
+(slime-setup '(slime-fancy slime-company))
+
+;; -------------------------------------------------------------------------------------------
+;; Other languages
+
+;; forth-mode
+;; https://github.com/larsbrinkhoff/forth-mode
+;; To start an interactive Forth session, type M-x run-forth.
+
+;; Install forth with
+;; yay -S gforth
+(require 'forth-mode)
+(require 'forth-block-mode)
+(require 'forth-interaction-mode)
+
+
+;; csharp-mode
+;; To do chapr in linux you need to install mono: https://wiki.archlinux.org/title/mono
+;; sudo pacman -S mono
+;; (require 'csharp-mode)
 
 
 (message ".emacs loaded correctly")
