@@ -118,7 +118,7 @@
  '(custom-safe-themes
    '("bf72d370fd0c2f47c632cd7314b1b9b7e0c79900c1947d0794ac2ecebb5ed584" default))
  '(package-selected-packages
-   '(company-c-headers forth-mode slime-company slime company-auctex auctex yasnippet-snippets multi-vterm vterm smex elpy cmake-mode cmake-ide rtags projectile hl-todo flycheck company fixmee magit multiple-cursors iedit)))
+   '(rjsx-mode company-c-headers forth-mode slime-company slime company-auctex auctex yasnippet-snippets multi-vterm vterm smex elpy cmake-mode cmake-ide rtags projectile hl-todo flycheck company fixmee magit multiple-cursors iedit)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -265,6 +265,12 @@
 (elpy-enable)
 (add-hook 'elpy-mode-hook (lambda () (highlight-indentation-mode -1)))
 
+;; To give support for the envs in python to elpy, dont' work
+;; follow this url: https://github.com/jorgenschaefer/elpy/issues/1727
+;; (setenv "WORKON_HOME" "/home/aleck/")
+
+;; (setq elpy-rpc-virtualenv-path 'current)
+
 ;; To enable flycheck for python, install pylint
 ;; https://pylint.org/
 ;; guide: https://pylint.readthedocs.io/en/latest/user_guide/usage/output.html
@@ -317,6 +323,14 @@
 (slime-setup '(slime-fancy slime-company))
 
 ;; -------------------------------------------------------------------------------------------
+;; My Java Packages and Configs
+(defun my-java-mode-hook ()
+  "Custom Java mode hook."
+  (setq-local c-basic-offset 4))
+
+(add-hook 'java-mode-hook 'my-java-mode-hook)
+
+;; -------------------------------------------------------------------------------------------
 ;; Other languages
 
 ;; forth-mode
@@ -334,6 +348,13 @@
 ;; To do chapr in linux you need to install mono: https://wiki.archlinux.org/title/mono
 ;; sudo pacman -S mono
 ;; (require 'csharp-mode)
+
+;; rjsx
+(require 'rjsx-mode)
+(add-to-list 'auto-mode-alist '("\\.tsx\\'" . rjsx-mode))
+
+;; Javascritp identation
+(setq js-indent-level 2)
 
 
 (message ".emacs loaded correctly")

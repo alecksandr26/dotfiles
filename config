@@ -150,7 +150,7 @@ bindsym $mod+Shift+c reload
 # restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
 bindsym $mod+Shift+r restart
 # exit i3 (logs you out of your X session)
-bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -B 'Yes, exit i3' 'i3-msg exit'"
+bindsym $mod+Ctrl+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -B 'Yes, exit i3' 'i3-msg exit'"
 
 # resize window (you can also use the mouse for that)
 mode "resize" {
@@ -192,7 +192,7 @@ for_window [class="^.*"] border pixel 0
 bindsym $mod+Ctrl+greater move workspace to output right
 bindsym $mod+Ctrl+less move workspace to output left
 
-bindsym $mod+Ctrl+e exec thunar
+bindsym $mod+Shift+f exec thunar
 
 bindsym --release $mod+Print exec scrot 'ArcoLinux-%Y-%m-%d-%H-%s_screenshot.png' -s -e 'xclip -selection clipboard -t image/png -i $f && rm *.png'
 bindsym --release Print exec scrot 'ArcoLinux-%Y-%m-%d-%H-%s_screenshot.png' -s -e 'mv *.png ~/Pictures/'
@@ -205,3 +205,4 @@ exec feh --bg-scale /home/alecksandr/Pictures/Wallpapers/pexels-cottonbro-547395
 bindsym $mod+z exec boomer
 
 bindsym $mod+Enter exec alacritty
+bindsym $mod+c exec ema
