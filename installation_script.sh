@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 # To connect ssh: ssh -o UserKnownHostsFile=/dev/null root@192.168.100.66
 # The whole script is base on the Installation Guide
 # https://wiki.archlinux.org/title/Installation_guide
@@ -168,37 +170,34 @@ sleep 2
 
 
 read -r -p "Put the hostname: " hostname
-read -r -p "Put the root's passwd: " root_passwd
+read -s -r -p "Put the root's passwd: " root_passwd
 read -r -p "Put an username: " username
-read -r -p "Put username's passwd: " username_passwd
+read -s -r -p "Put username's passwd: " username_passwd
 
 # Export variables to be available in arch-chroot
-export DISK_DEVICE="$disk_device"
-export HOSTNAME_NEW="$hostname"
-export USERNAME="$username"
-export ROOT_PASSWD="$root_passwd"
-export USERNAME_PASSWD="$username_passwd"
+export DISK_DEVICE=$disk_device
+export HOSTNAME=$hostname
+export USERNAME=$username
+export ROOT_PASSWD=$root_passwd
+export USER_PASSWD=$username_passwd
 
 echo "USERNAME: $USERNAME"
-echo "USERNAME_PASSWD: $USERNAME_PASSWD"
+echo "HOSTNAME: $HOSTNAME"
+echo "USER_PASSWD: $USER_PASSWD"
 echo "ROOT_PASSWD: $ROOT_PASSWD"
 
 sleep 1
 
-arch-chroot /mnt /bin/bash <<EOF_CHROOT
+arch-chroot /mnt /bin/bash <<EOF
+#!/usr/bin/env bash
 
+
+# Print the exported variables
+echo $HOSTNAME
 echo $USERNAME
-echo $USERNAME_PASSWD
+echo $USER_PASSWD
 echo $ROOT_PASSWD
 
-# Use the exported variables
-root_passwd=\${ROOT_PASSWD}
-username=\${USERNAME}
-username_passwd=\${USERNAME_PASSWD}
-
-echo $username
-echo $root_passwd
-echo $username_passwd
 
 configure_system() {
     echo "Setting timezone..."
@@ -219,7 +218,7 @@ configure_system() {
 
     echo "Setting hostname..."
     sleep 2
-    echo "arch" > /etc/hostname
+    echo $HOSTNAME > /etc/hostname
     echo -e "127.0.0.1 \t localhost \n ::1 \t \t localhost \n 127.0.1.1 \t arch.localdomain \t arch" >> /etc/hosts 
 }
 
@@ -244,16 +243,14 @@ installing_grub() {
 configure_new_user() {
     echo "Setting root password..."
     sleep 2
-    # (echo ${root_passwd}) | passwd
-    passwd
+    (echo root:${ROOT_PASSWD}) | chpasswd
 
     echo "Creating user and the sudo..."
     sleep 2
-    useradd -m -G wheel $username
-    echo "Setting the password for user ${username}..."
+    useradd -m -G wheel $USERNAME
+    echo "Setting the password for user ${USERNAME}..."
     sleep 2
-    # (echo ${username_passwd}) | passwd $username
-    passwd $username
+    (echo ${USERNAME}:${USER_PASSWD}) | chpasswd
 }
 
 
@@ -286,7 +283,7 @@ configure_new_user
 # configure_sudo
 
 
-EOF_CHROOT
+EOF
 
 if [ $? -ne 0 ]; then
     echo "Chrooting failed."
