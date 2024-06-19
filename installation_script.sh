@@ -294,7 +294,7 @@ fi
 # 12. Exit archiso and Reboot
 echo "Exiting chroot and rebooting..."
 read -n1 -r -p "Press any key to continue..." key
-echo "Umounting /mnt/..."
+echo "Umounting recursive /mnt/..."
 sleep 1
 umount -R /mnt
 if [ $? -ne 0 ]; then
@@ -303,6 +303,8 @@ if [ $? -ne 0 ]; then
 else
     echo "Umounting /mnt/ success."
 fi
+
+swapoff /dev/sda2
 
 echo "Rebooting..."
 sleep 2
