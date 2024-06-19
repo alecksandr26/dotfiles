@@ -191,9 +191,9 @@ echo $USERNAMEPASSWD
 echo $ROOTPASSWD
 
 # Use the exported variables
-root_passwd="\$ROOTPASSWD"
-username="\$USERNAME"
-username_passwd="\$USERNAMEPASSWD"
+root_passwd=\${ROOTPASSWD}
+username=\${USERNAME}
+username_passwd=\${USERNAMEPASSWD}
 
 echo $username
 echo $root_passwd
