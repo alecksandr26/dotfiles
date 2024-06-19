@@ -1,5 +1,4 @@
-
-# 
+# To connect ssh: ssh -o UserKnownHostsFile=/dev/null root@192.168.100.66
 # The whole script is base on the Installation Guide
 # https://wiki.archlinux.org/title/Installation_guide
 
@@ -105,7 +104,22 @@ genfstab -U /mnt >> /mnt/etc/fstab
 # 6. Chroot into the New System
 echo "Chrooting into the new system..."
 arch-chroot /mnt /bin/bash <<EOF_CHROOT
-ls
+
+configure_system() {
+    echo "Setting timezone..."
+    ln -sf /usr/share/zoneinfo/Mexico/General /etc/localtime
+    hwclock --systohc
+
+    echo "Configuring locale..."
+}
+
+
+
+# 7. Configure the System
+configure_system
+
+
+
 EOF_CHROOT
 
 
