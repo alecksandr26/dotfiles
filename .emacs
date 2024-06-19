@@ -240,15 +240,15 @@
 ;; rtags
 ;; Install manually: https://github.com/Andersbakken/rtags#tldr-quickstart
 ;; Usage: https://github.com/Andersbakken/rtags/wiki/Usage
-(require 'rtags)
-(add-hook 'after-init-hook 'rtags-start-process-unless-running)
+;; (require 'rtags)
+;; (add-hook 'after-init-hook 'rtags-start-process-unless-running)
 ;; Adding the keybingds
-(rtags-enable-standard-keybindings)
+;; (rtags-enable-standard-keybindings)
 
 ;; cmake-ide
 ;; https://github.com/atilaneves/cmake-ide
 ;; Starts the server 'rdm' and the 'rc -J' if a 'compile_commands.json' exist
-(cmake-ide-setup)
+;; (cmake-ide-setup)
 
 ;; cmake-mode
 ;; https://melpa.org/#/cmake-mode
