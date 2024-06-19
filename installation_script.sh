@@ -102,8 +102,16 @@ echo "Generating fstab..."
 
 # 6. Chroot into the New System
 echo "Chrooting into the new system..."
-arch-chroot /mnt
+arch-chroot /mnt /bin/bash <<EOF_CHROOT
 ls
+EOF_CHROOT
 
+
+
+
+# 11. Exit Chroot and Reboot
+echo "Exiting chroot and rebooting..."
+umount -R /mnt
+reboot
 
 
