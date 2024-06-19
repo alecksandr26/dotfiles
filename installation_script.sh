@@ -178,6 +178,10 @@ export ROOT_PASSWD=$root_passwd
 export USERNAME=$username
 export USERNAME_PASSWD=$username_passwd
 
+echo $USERNAME
+echo $USERNAME_PASSWD
+echo $ROOT_PASSWD
+
 sleep 1
 read -n1 -r -p "Press any key to continue..." key
 
@@ -187,6 +191,10 @@ arch-chroot /mnt /bin/bash <<EOF_CHROOT
 root_passwd=$ROOT_PASSWD
 username=$USERNAME
 username_passwd=$USERNAME_PASSWD
+
+echo $USERNAME
+echo $USERNAME_PASSWD
+echo $ROOT_PASSWD
 
 echo $root_passwd
 echo $username
