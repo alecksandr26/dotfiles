@@ -5,6 +5,7 @@
 # Function to check internet connection
 check_internet() {
     echo "Checking internet connection..."
+    sleep 2
     ping -c 1 archlinux.org &> /dev/null
     if [ $? -ne 0 ]; then
         echo "No internet connection detected. Please check your connection and try again."
@@ -76,50 +77,63 @@ check_internet
 
 # 2. Updating the system clock
 echo "Updating the system clock..."
+sleep 2
 timedatectl set-ntp true
-echo "Checking the service..."
+
+echo "Checking the clock service..."
+sleep 2
 timedatectl status
 
 # 2. Partition the Disk
 echo "Checking the disks..."
 fdisk -l
+sleep 2
+read -n1 -r -p "Press any key to continue..." key
 partition_disk
 
 
 # 3. Format and Mount Partitions
 echo "Formatting and mounting partitions..."
+sleep 2
 formatting
 mounting
 
 # 4. Install Base System
 echo "Installing base system..."
+sleep 2
 pacstrap /mnt base linux linux-firmware
 
 
 # 5. Generate fstab
 echo "Generating fstab..."
+sleep 2
 genfstab -U /mnt >> /mnt/etc/fstab
 
 
 # 6. Chroot into the New System
 echo "Chrooting into the new system..."
+sleep 2
 arch-chroot /mnt /bin/bash <<EOF_CHROOT
 
 configure_system() {
     echo "Setting timezone..."
+    sleep 2
     ln -sf /usr/share/zoneinfo/Mexico/General /etc/localtime
     hwclock --systohc
 
     echo "Configuring locale..."
+    sleep 2
     echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
     echo "es_MX.UTF-8 UTF-8" >> /etc/locale.gen
     locale-gen
     echo "LANG=en_US.UTF-8" > /etc/locale.conf
 
     echo "Configuring vconsole..."
+    sleep 2
     echo "KEYMAP=us" > /etc/vconsole.conf
 
     echo "Setting hostname..."
+    sleep 2
     echo "arch" > /etc/hostname
     echo -e "127.0.0.1 \t localhost \n ::1 \t \t localhost \n 127.0.1.1 \t arch.localdomain \t arch" >> /etc/hosts 
 }
@@ -127,6 +141,7 @@ configure_system() {
 
 configure_network() {
     echo "Enabling network service..."
+    sleep 2
     (echo y) | pacman -S networkmanager dhcpcd
     systemctl enable NetworkManager
     systemctl enable dhcpcd	    		    		    		   
@@ -134,6 +149,7 @@ configure_network() {
 
 installing_grub() {
     echo "Installing GRUB boot loader..."
+    sleep 2
     (echo y) | pacman -S grub efibootmgr
     grub-install --target=x86_64-efi --efi-directory=/boot/ --bootloader-id=GRUB
     echo "Configuring GRUB..."
@@ -142,19 +158,23 @@ installing_grub() {
 
 configure_new_user() {
     echo "Setting root password..."
+    sleep 2
     passwd
 
     echo "Creating user and the sudo..."
+    sleep 2
     echo -e "Put your username: "
     read username
     useradd -m -G wheel $username
     echo "Setting the password for user $username..."
+    sleep 2
     passwd $username	
 }
 
 
 configure_sudo() {
     echo "Installing sudo..."
+    sleep 2
     (echo y) | pacman -S sudo vim
     echo "Configuring sudo..."
     sleep 2
