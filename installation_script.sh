@@ -61,7 +61,7 @@ fi
 formatting() {
     mkfs.fat -F32 /dev/sda1
     mkswap /dev/sda2
-    mkfs.ext4 /dev/sda3    
+    (echo y) | mkfs.ext4 /dev/sda3
 }
 
 mounting() {
@@ -111,23 +111,82 @@ configure_system() {
     hwclock --systohc
 
     echo "Configuring locale..."
+    echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
+    echo "es_MX.UTF-8 UTF-8" >> /etc/locale.gen
+    locale-gen
+    echo "LANG=en_US.UTF-8" > /etc/locale.conf
+
+    echo "Configuring vconsole..."
+    echo "KEYMAP=us" > /etc/vconsole.conf
+
+    echo "Setting hostname..."
+    echo "arch" > /etc/hostname
+    echo -e "127.0.0.1 \t localhost \n ::1 \t \t localhost \n 127.0.1.1 \t arch.localdomain \t arch" >> /etc/hosts 
 }
 
+
+configure_network() {
+    echo "Enabling network service..."
+    (echo y) | pacman -S networkmanager dhcpcd
+    systemctl enable NetworkManager
+    systemctl enable dhcpcd	    		    		    		   
+}
+
+installing_grub() {
+    echo "Installing GRUB boot loader..."
+    (echo y) | pacman -S grub efibootmgr
+    grub-install --target=x86_64-efi --efi-directory=/boot/ --bootloader-id=GRUB
+    echo "Configuring GRUB..."
+    grub-mkconfig -o /boot/grub/grub.cfg
+}
+
+configure_new_user() {
+    echo "Setting root password..."
+    passwd
+
+    echo "Creating user and the sudo..."
+    echo -e "Put your username: "
+    read username
+    useradd -m -G wheel $username
+    echo "Setting the password for user $username..."
+    passwd $username	
+}
+
+
+configure_sudo() {
+    echo "Installing sudo..."
+    (echo y) | pacman -S sudo vim
+    echo "Configuring sudo..."
+    sleep 2
+    EDITOR=vim visudo	
+}
 
 
 # 7. Configure the System
 configure_system
 
 
+# 8. Configure Network
+configure_network
+
+# 9. Install GRUB Boot Loader and Configure it
+installing_grub
+
+
+# 10. Set Root Password and Create User
+configure_new_user
+
+
+# 11. Set sudo
+configure_sudo
+
 
 EOF_CHROOT
 
 
-
-
-# 11. Exit Chroot and Reboot
+# 12. Exit archiso and Reboot
 echo "Exiting chroot and rebooting..."
-# umount -R /mnt
-# reboot
+umount -R /mnt
+reboot
 
 
