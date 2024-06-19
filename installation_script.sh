@@ -82,22 +82,22 @@ timedatectl status
 # 2. Partition the Disk
 echo "Checking the disks..."
 fdisk -l
-# partition_disk
+partition_disk
 
 
 # 3. Format and Mount Partitions
 echo "Formatting and mounting partitions..."
-# formatting
-# mounting
+formatting
+mounting
 
 # 4. Install Base System
 echo "Installing base system..."
-# pacstrap /mnt base linux linux-firmware
+pacstrap /mnt base linux linux-firmware
 
 
 # 5. Generate fstab
 echo "Generating fstab..."
-# genfstab -U /mnt >> /mnt/etc/fstab
+genfstab -U /mnt >> /mnt/etc/fstab
 
 
 # 6. Chroot into the New System
