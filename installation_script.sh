@@ -103,6 +103,7 @@ genfstab -U /mnt >> /mnt/etc/fstab
 # 6. Chroot into the New System
 echo "Chrooting into the new system..."
 arch-chroot /mnt
+ls
 
 
 
