@@ -18,6 +18,7 @@ check_internet() {
 
 
 partition_disk() {
+    local disk=$1
     echo "Partitioning the disk..."
 (
     echo g # Create a new GPT partition table
@@ -46,7 +47,7 @@ partition_disk() {
     echo 20 # Type Linux filesystem
 
     echo w # Write changes
-) | fdisk /dev/sda
+) | fdisk $disk
 
 # Check if fdisk commands executed successfully
 if [ $? -ne 0 ]; then
@@ -58,7 +59,8 @@ fi
 }
 
 formatting() {
-    mkfs.fat -F32 /dev/sda1
+    local disk=$1
+    mkfs.fat -F32 ${disk}1
     if [ $? -ne 0 ]; then
 	echo "Formating /dev/sda1 failed."
 	exit 1
@@ -66,7 +68,7 @@ formatting() {
 	echo "Formating /dev/sda1 success."
     fi
     
-    mkswap /dev/sda2
+    mkswap ${disk}2
     if [ $? -ne 0 ]; then
 	echo "Making swapon /dev/sda2 failed."
 	exit 1
@@ -75,7 +77,7 @@ formatting() {
     fi
     
     
-    (echo y) | mkfs.ext4 /dev/sda3
+    (echo y) | mkfs.ext4 ${disk}3
     if [ $? -ne 0 ]; then
 	echo "Formating /dev/sda3 failed."
 	exit 1
@@ -85,7 +87,8 @@ formatting() {
 }
 
 mounting() {
-    mount /dev/sda3 /mnt
+    local disk=$1
+    mount ${disk}3 /mnt
     if [ $? -ne 0 ]; then
 	echo "Mounting /dev/sda3 to /mnt failed."
 	exit 1
@@ -93,14 +96,14 @@ mounting() {
 	echo "Mounting /dev/sda3 to /mnt success."
     fi
     mkdir /mnt/boot
-    mount /dev/sda1 /mnt/boot
+    mount ${disk}1 /mnt/boot
     if [ $? -ne 0 ]; then
 	echo "Mounting /dev/sda1 to /mnt/boot failed."
 	exit 1
     else
 	echo "Mounting /dev/sda1 to /mnt/boot success."
     fi
-    swapon /dev/sda2
+    swapon ${disk}2
     if [ $? -ne 0 ]; then
 	echo "Swaponing /dev/sda2 failed."
 	exit 1
@@ -125,16 +128,17 @@ timedatectl status
 echo "Checking the disks..."
 sleep 2
 fdisk -l
+read -p "Enter the disk device (e.g., /dev/sda): " disk_device
 read -n1 -r -p "Press any key to continue..." key
-partition_disk
+partition_disk $disk_device
 
 
 # 3. Format and Mount Partitions
 echo "Formatting and mounting partitions..."
 sleep 2
-formatting
+formatting $disk_device
 sleep 2
-mounting
+mounting $disk_device
 
 # 4. Install Base System
 echo "Installing base system..."
@@ -162,13 +166,27 @@ fi
 # 6. Chroot into the New System
 echo "Chrooting into the new system and configure it..."
 sleep 2
+
+
 read -r -p "Put the root's passwd: " root_passwd
 read -r -p "Put an username: " username
 read -r -p "Put username's passwd: " username_passwd
+
+# Export variables to be available in arch-chroot
+export DISK_DEVICE=$disk_device
+export ROOT_PASSWD=$root_passwd
+export USERNAME=$username
+export USERNAME_PASSWD=$username_passwd
+
 sleep 1
 read -n1 -r -p "Press any key to continue..." key
 
 arch-chroot /mnt /bin/bash <<EOF_CHROOT
+
+# Use the exported variables
+root_passwd=$ROOT_PASSWD
+username=$USERNAME
+username_passwd=$USERNAME_PASSWD
 
 configure_system() {
     echo "Setting timezone..."
@@ -255,6 +273,14 @@ configure_new_user
 
 
 EOF_CHROOT
+
+if [ $? -ne 0 ]; then
+    echo "Chrooting failed."
+    exit 1
+else
+    echo "Chrooting success."
+fi
+
 
 # 12. Exit archiso and Reboot
 echo "Exiting chroot and rebooting..."
