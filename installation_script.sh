@@ -232,14 +232,16 @@ installing_grub() {
 configure_new_user() {
     echo "Setting root password..."
     sleep 2
-    (echo ${root_passwd}) | passwd
+    # (echo ${root_passwd}) | passwd
+    passwd
 
     echo "Creating user and the sudo..."
     sleep 2
     useradd -m -G wheel $username
     echo "Setting the password for user ${username}..."
     sleep 2
-    (echo ${username_passwd}) | passwd $username
+    # (echo ${username_passwd}) | passwd $username
+    passwd $username
 }
 
 
