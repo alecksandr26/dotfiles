@@ -171,33 +171,31 @@ sleep 2
 
 read -r -p "Put the hostname: " hostname
 read -s -r -p "Put the root's passwd: " root_passwd
+echo ""
 read -r -p "Put an username: " username
 read -s -r -p "Put username's passwd: " username_passwd
+echo ""
 
 # Export variables to be available in arch-chroot
+# The issue you're encountering stems from how variables are expanded within a here document (<<EOF). Specifically, variables inside a here document are subject to expansion at the time the here document is parsed, not when it's executed. This can lead to unexpected behavior, especially with special characters like # and $.
+
+# Problem Explanation
+# When you use a here document (<<EOF) in Bash, variables inside the here document are expanded before the script inside the here document is executed. This means any special characters or variable syntax ($) inside the variable PASSWD will be interpreted prematurely, potentially causing syntax errors or unexpected behavior.
+
+# Solution: Quoting and Here Document
+# To solve this problem, you need to ensure that variables inside the here document are quoted properly to delay their expansion until runtime, when they are actually used within the here document script.
+
+# Here’s how you can modify your script to handle special characters correctly:
 export DISK_DEVICE=$disk_device
 export HOSTNAME=$hostname
 export USERNAME=$username
 export ROOT_PASSWD=$root_passwd
 export USER_PASSWD=$username_passwd
 
-echo "USERNAME: $USERNAME"
-echo "HOSTNAME: $HOSTNAME"
-echo "USER_PASSWD: $USER_PASSWD"
-echo "ROOT_PASSWD: $ROOT_PASSWD"
-
 sleep 1
 
 arch-chroot /mnt /bin/bash <<EOF
 #!/usr/bin/env bash
-
-
-# Print the exported variables
-echo $HOSTNAME
-echo $USERNAME
-echo $USER_PASSWD
-echo $ROOT_PASSWD
-
 
 configure_system() {
     echo "Setting timezone..."
@@ -218,7 +216,7 @@ configure_system() {
 
     echo "Setting hostname..."
     sleep 2
-    echo $HOSTNAME > /etc/hostname
+    echo "\$HOSTNAME" > /etc/hostname
     echo -e "127.0.0.1 \t localhost \n ::1 \t \t localhost \n 127.0.1.1 \t arch.localdomain \t arch" >> /etc/hosts 
 }
 
@@ -243,14 +241,14 @@ installing_grub() {
 configure_new_user() {
     echo "Setting root password..."
     sleep 2
-    (echo root:${ROOT_PASSWD}) | chpasswd
+    (echo root:"\$ROOT_PASSWD") | chpasswd
 
     echo "Creating user and the sudo..."
     sleep 2
     useradd -m -G wheel $USERNAME
-    echo "Setting the password for user ${USERNAME}..."
+    echo "Setting the password for user "\$USERNAME"..."
     sleep 2
-    (echo ${USERNAME}:${USER_PASSWD}) | chpasswd
+    (echo "\$USERNAME":"\$USER_PASSWD") | chpasswd
 }
 
 
