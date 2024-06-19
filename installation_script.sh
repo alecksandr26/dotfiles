@@ -174,8 +174,9 @@ read -r -p "Put username's passwd: " username_passwd
 
 # Export variables to be available in arch-chroot
 export DISK_DEVICE=$disk_device
-export ROOTPASSWD=$root_passwd
+
 export USERNAME=$username
+export ROOTPASSWD=$root_passwd
 export USERNAMEPASSWD=$username_passwd
 
 echo $USERNAME
@@ -192,12 +193,12 @@ echo $USERNAMEPASSWD
 echo $ROOTPASSWD
 
 # Use the exported variables
-root_passwd=$ROOTPASSWD
-username=$USERNAME
-username_passwd=$USERNAMEPASSWD
+root_passwd="\$ROOTPASSWD"
+username="\$USERNAME"
+username_passwd="\$USERNAMEPASSWD"
 
-echo $root_passwd
 echo $username
+echo $root_passwd
 echo $username_passwd
 
 configure_system() {
