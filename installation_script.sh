@@ -19,33 +19,34 @@ check_internet() {
 
 partition_disk() {
     echo "Partitioning the disk..."
-    fdisk /dev/sda <<EOF
-n
-p
-1
+(
+echo g # Create a new GPT partition table
+echo n # New partition
+echo 1 # Partition number
+echo   # First sector (Accept default: 1)
+echo +512M # Last sector (Accept default: varies)
+echo t # Change partition type
+echo 1 # Partition number
+echo 1 # EFI System
 
-+512M
-t
-1
-uefi
-n
-p
-2
+echo n # New partition
+echo 2 # Partition number
+echo   # First sector (Accept default: next free)
+echo +16G # Last sector
+echo t # Change partition type
+echo 2 # Partition number
+echo 19 # Linux swap
 
-+16G
-t
-2
-swap
-n
-p
-3
+echo n # New partition
+echo 3 # Partition number
+echo   # First sector (Accept default: next free)
+echo   # Last sector (Accept default: varies)
+echo t # Change partition type
+echo 3 # Partition number
+echo 20 # Linux filesystem
 
-
-t
-3
-linux
-w
-EOF
+echo w # Write changes
+) | fdisk /dev/sda
 }
 
 # 1. Check Internet Connection
