@@ -20,8 +20,8 @@ check_internet() {
 partition_disk() {
     echo "Partitioning the disk..."
 (
+    echo g # Create a new GPT partition table
     echo n # Add a new partition
-    echo p 
     echo 1 # Partition number
     echo   # First sector (Accept default: 1)
     echo +512M # Last sector
@@ -30,7 +30,6 @@ partition_disk() {
     # echo 1 # Type EFI System
 
     echo n # Add a new partition
-    echo p
     echo 2 # Partition number
     echo   # First sector (Accept default: next free)
     echo +4G # Last sector
@@ -39,7 +38,6 @@ partition_disk() {
     echo 19 # Type Linux swap
 
     echo n # Add a new partition
-    echo p
     echo 3 # Partition number
     echo   # First sector (Accept default: next free)
     echo   # Last sector (Accept default: varies)
@@ -55,21 +53,60 @@ if [ $? -ne 0 ]; then
     echo "Partitioning failed. Please check the fdisk commands and try again."
     exit 1
 else
-    echo "The partition was successful."
+    echo "Disk partitioning completed successfully."
 fi
 }
 
 formatting() {
     mkfs.fat -F32 /dev/sda1
+    if [ $? -ne 0 ]; then
+	echo "Formating /dev/sda1 failed."
+	exit 1
+    else
+	echo "Formating /dev/sda1 success."
+    fi
+    
     mkswap /dev/sda2
+    if [ $? -ne 0 ]; then
+	echo "Making swapon /dev/sda2 failed."
+	exit 1
+    else
+	echo "Making swapon /dev/sda2 success."
+    fi
+    
+    
     (echo y) | mkfs.ext4 /dev/sda3
+    if [ $? -ne 0 ]; then
+	echo "Formating /dev/sda3 failed."
+	exit 1
+    else
+	echo "Formating /dev/sda3 success."
+    fi
 }
 
 mounting() {
     mount /dev/sda3 /mnt
+    if [ $? -ne 0 ]; then
+	echo "Mounting /dev/sda3 to /mnt failed."
+	exit 1
+    else
+	echo "Mounting /dev/sda3 to /mnt success."
+    fi
     mkdir /mnt/boot
     mount /dev/sda1 /mnt/boot
+    if [ $? -ne 0 ]; then
+	echo "Mounting /dev/sda1 to /mnt/boot failed."
+	exit 1
+    else
+	echo "Mounting /dev/sda1 to /mnt/boot success."
+    fi
     swapon /dev/sda2
+    if [ $? -ne 0 ]; then
+	echo "Swaponing /dev/sda2 failed."
+	exit 1
+    else
+	echo "Swaponing /dev/sda2 success."
+    fi
 }
 
 # 1. Check Internet Connection
@@ -102,17 +139,34 @@ mounting
 echo "Installing base system..."
 sleep 2
 pacstrap /mnt base linux linux-firmware
+if [ $? -ne 0 ]; then
+    echo "Base system installation failed."
+    exit 1
+else
+    echo "Base system installation success."
+fi
 
 
 # 5. Generate fstab
 echo "Generating fstab..."
 sleep 2
 genfstab -U /mnt >> /mnt/etc/fstab
-
+if [ $? -ne 0 ]; then
+    echo "Generating fstab failed."
+    exit 1
+else
+    echo "Generating fstab success."
+fi
 
 # 6. Chroot into the New System
-echo "Chrooting into the new system..."
+echo "Chrooting into the new system and configure it..."
 sleep 2
+read -n1 -r -p "Put the root's passwd: " root_passwd
+read -n1 -r -p "Put an username: " username
+read -n1 -r -p "Put username's passwd: " username_passwd
+sleep 1
+read -n1 -r -p "Press any key to continue..." key
+
 arch-chroot /mnt /bin/bash <<EOF_CHROOT
 
 configure_system() {
@@ -159,16 +213,14 @@ installing_grub() {
 configure_new_user() {
     echo "Setting root password..."
     sleep 2
-    passwd
+    (echo $root_passwd) | passwd
 
     echo "Creating user and the sudo..."
     sleep 2
-    echo -e "Put your username: "
-    read username
     useradd -m -G wheel $username
     echo "Setting the password for user $username..."
     sleep 2
-    passwd $username	
+    (echo $username_passwd) | passwd $username	
 }
 
 
@@ -198,15 +250,26 @@ configure_new_user
 
 
 # 11. Set sudo
-configure_sudo
+# configure_sudo
 
 
 EOF_CHROOT
 
-
 # 12. Exit archiso and Reboot
 echo "Exiting chroot and rebooting..."
+read -n1 -r -p "Press any key to continue..." key
+echo "Umounting /mnt/..."
+sleep 1
 umount -R /mnt
+if [ $? -ne 0 ]; then
+    echo "Umounting /mnt/ failed."
+    exit 1
+else
+    echo "Umounting /mnt/ success."
+fi
+
+echo "Rebooting..."
+sleep 2
 reboot
 
 
