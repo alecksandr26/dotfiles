@@ -188,6 +188,10 @@ root_passwd=$ROOT_PASSWD
 username=$USERNAME
 username_passwd=$USERNAME_PASSWD
 
+echo $root_passwd
+echo $username
+echo $username_passwd
+
 configure_system() {
     echo "Setting timezone..."
     sleep 2
