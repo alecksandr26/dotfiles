@@ -57,6 +57,19 @@ else
 fi
 }
 
+formatting() {
+    mkfs.fat -F32 /dev/sda1
+    mkswap /dev/sda2
+    mkfs.ext4 /dev/sda3    
+}
+
+mounting() {
+    mount /dev/sda3 /mnt
+    mkdir /mnt/boot
+    mount /dev/sda1 /mnt/boot
+    swapon /dev/sda2
+}
+
 # 1. Check Internet Connection
 check_internet
 
@@ -72,7 +85,24 @@ fdisk -l
 partition_disk
 
 
+# 3. Format and Mount Partitions
+echo "Formatting and mounting partitions..."
+formatting
+mounting
 
+# 4. Install Base System
+echo "Installing base system..."
+pacstrap /mnt base linux linux-firmware
+
+
+# 5. Generate fstab
+echo "Generating fstab..."
+genfstab -U /mnt >> /mnt/etc/fstab
+
+
+# 6. Chroot into the New System
+echo "Chrooting into the new system..."
+arch-chroot /mnt
 
 
 
