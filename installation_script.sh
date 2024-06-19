@@ -174,27 +174,27 @@ read -r -p "Put username's passwd: " username_passwd
 
 # Export variables to be available in arch-chroot
 export DISK_DEVICE=$disk_device
-export ROOT_PASSWD=$root_passwd
+export ROOTPASSWD=$root_passwd
 export USERNAME=$username
-export USERNAME_PASSWD=$username_passwd
+export USERNAMEPASSWD=$username_passwd
 
 echo $USERNAME
-echo $USERNAME_PASSWD
-echo $ROOT_PASSWD
+echo $USERNAMEPASSWD
+echo $ROOTPASSWD
 
 sleep 1
 read -n1 -r -p "Press any key to continue..." key
 
 arch-chroot /mnt /bin/bash <<EOF_CHROOT
 
-# Use the exported variables
-root_passwd=$ROOT_PASSWD
-username=$USERNAME
-username_passwd=$USERNAME_PASSWD
-
 echo $USERNAME
-echo $USERNAME_PASSWD
-echo $ROOT_PASSWD
+echo $USERNAMEPASSWD
+echo $ROOTPASSWD
+
+# Use the exported variables
+root_passwd=$ROOTPASSWD
+username=$USERNAME
+username_passwd=$USERNAMEPASSWD
 
 echo $root_passwd
 echo $username
