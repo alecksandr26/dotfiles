@@ -123,8 +123,8 @@ timedatectl status
 
 # 2. Partition the Disk
 echo "Checking the disks..."
-fdisk -l
 sleep 2
+fdisk -l
 read -n1 -r -p "Press any key to continue..." key
 partition_disk
 
@@ -133,6 +133,7 @@ partition_disk
 echo "Formatting and mounting partitions..."
 sleep 2
 formatting
+sleep 2
 mounting
 
 # 4. Install Base System
@@ -161,9 +162,9 @@ fi
 # 6. Chroot into the New System
 echo "Chrooting into the new system and configure it..."
 sleep 2
-read -n1 -r -p "Put the root's passwd: " root_passwd
-read -n1 -r -p "Put an username: " username
-read -n1 -r -p "Put username's passwd: " username_passwd
+read -r -p "Put the root's passwd: " root_passwd
+read -r -p "Put an username: " username
+read -r -p "Put username's passwd: " username_passwd
 sleep 1
 read -n1 -r -p "Press any key to continue..." key
 
