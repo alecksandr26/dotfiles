@@ -20,32 +20,34 @@ check_internet() {
 partition_disk() {
     echo "Partitioning the disk..."
 (
-echo g # Create a new GPT partition table
-echo n # Add a new partition
-echo 1 # Partition number
-echo   # First sector (Accept default: 1)
-echo +512M # Last sector
-echo t # Change partition type
-echo 1 # Select partition 1
-# echo 1 # Type EFI System
+    echo n # Add a new partition
+    echo p 
+    echo 1 # Partition number
+    echo   # First sector (Accept default: 1)
+    echo +512M # Last sector
+    echo t # Change partition type
+    echo 1 # Select partition 1
+    # echo 1 # Type EFI System
 
-echo n # Add a new partition
-echo 2 # Partition number
-echo   # First sector (Accept default: next free)
-echo +4G # Last sector
-echo t # Change partition type
-echo 2 # Select partition 2
-echo 19 # Type Linux swap
+    echo n # Add a new partition
+    echo p
+    echo 2 # Partition number
+    echo   # First sector (Accept default: next free)
+    echo +4G # Last sector
+    echo t # Change partition type
+    echo 2 # Select partition 2
+    echo 19 # Type Linux swap
 
-echo n # Add a new partition
-echo 3 # Partition number
-echo   # First sector (Accept default: next free)
-echo   # Last sector (Accept default: varies)
-echo t # Change partition type
-echo 3 # Select partition 3
-echo 20 # Type Linux filesystem
+    echo n # Add a new partition
+    echo p
+    echo 3 # Partition number
+    echo   # First sector (Accept default: next free)
+    echo   # Last sector (Accept default: varies)
+    echo t # Change partition type
+    echo 3 # Select partition 3
+    echo 20 # Type Linux filesystem
 
-echo w # Write changes
+    echo w # Write changes
 ) | fdisk /dev/sda
 
 # Check if fdisk commands executed successfully
@@ -111,7 +113,7 @@ EOF_CHROOT
 
 # 11. Exit Chroot and Reboot
 echo "Exiting chroot and rebooting..."
-umount -R /mnt
-reboot
+# umount -R /mnt
+# reboot
 
 
