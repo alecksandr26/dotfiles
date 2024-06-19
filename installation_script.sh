@@ -51,6 +51,8 @@ echo w # Write changes
 if [ $? -ne 0 ]; then
     echo "Partitioning failed. Please check the fdisk commands and try again."
     exit 1
+else
+    echo "The partition was successful."
 fi
 }
 
