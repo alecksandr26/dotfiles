@@ -22,7 +22,7 @@ partition_disk() {
 (
 echo g # Create a new GPT partition table
 echo n # New partition
-echo 1 # Partition number
+echo p
 echo   # First sector (Accept default: 1)
 echo +512M # Last sector (Accept default: varies)
 echo t # Change partition type
@@ -30,6 +30,7 @@ echo 1 # Partition number
 echo 1 # EFI System
 
 echo n # New partition
+echo p
 echo 2 # Partition number
 echo   # First sector (Accept default: next free)
 echo +16G # Last sector
@@ -38,6 +39,7 @@ echo 2 # Partition number
 echo 19 # Linux swap
 
 echo n # New partition
+echo p
 echo 3 # Partition number
 echo   # First sector (Accept default: next free)
 echo   # Last sector (Accept default: varies)
