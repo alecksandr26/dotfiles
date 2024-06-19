@@ -197,6 +197,10 @@ sleep 1
 arch-chroot /mnt /bin/bash <<EOF
 #!/usr/bin/env bash
 
+
+echo "\$ROOT_PASSWD"
+echo "\$USER_PASSWD"
+
 configure_system() {
     echo "Setting timezone..."
     sleep 2
