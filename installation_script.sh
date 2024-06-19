@@ -47,6 +47,7 @@ echo 20 # Type Linux filesystem
 
 echo w # Write changes
 ) | fdisk /dev/sda
+
 # Check if fdisk commands executed successfully
 if [ $? -ne 0 ]; then
     echo "Partitioning failed. Please check the fdisk commands and try again."
