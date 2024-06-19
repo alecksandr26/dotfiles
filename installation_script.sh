@@ -129,7 +129,6 @@ echo "Checking the disks..."
 sleep 2
 fdisk -l
 read -p "Enter the disk device (e.g., /dev/sda): " disk_device
-read -n1 -r -p "Press any key to continue..." key
 partition_disk $disk_device
 
 
@@ -175,16 +174,15 @@ read -r -p "Put username's passwd: " username_passwd
 # Export variables to be available in arch-chroot
 export DISK_DEVICE=$disk_device
 
-export USERNAME=$username
-export ROOTPASSWD=$root_passwd
-export USERNAMEPASSWD=$username_passwd
+export USERNAME="$username"
+export ROOTPASSWD="$root_passwd"
+export USERNAMEPASSWD="$username_passwd"
 
-echo $USERNAME
-echo $USERNAMEPASSWD
-echo $ROOTPASSWD
+echo "USERNAME: $USERNAME"
+echo "USERNAMEPASSWD: $USERNAMEPASSWD"
+echo "ROOTPASSWD: $ROOTPASSWD"
 
 sleep 1
-read -n1 -r -p "Press any key to continue..." key
 
 arch-chroot /mnt /bin/bash <<EOF_CHROOT
 
