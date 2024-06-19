@@ -167,33 +167,34 @@ echo "Chrooting into the new system and configure it..."
 sleep 2
 
 
+read -r -p "Put the hostname: " hostname
 read -r -p "Put the root's passwd: " root_passwd
 read -r -p "Put an username: " username
 read -r -p "Put username's passwd: " username_passwd
 
 # Export variables to be available in arch-chroot
-export DISK_DEVICE=$disk_device
-
+export DISK_DEVICE="$disk_device"
+export HOSTNAME_NEW="$hostname"
 export USERNAME="$username"
-export ROOTPASSWD="$root_passwd"
-export USERNAMEPASSWD="$username_passwd"
+export ROOT_PASSWD="$root_passwd"
+export USERNAME_PASSWD="$username_passwd"
 
 echo "USERNAME: $USERNAME"
-echo "USERNAMEPASSWD: $USERNAMEPASSWD"
-echo "ROOTPASSWD: $ROOTPASSWD"
+echo "USERNAME_PASSWD: $USERNAME_PASSWD"
+echo "ROOT_PASSWD: $ROOT_PASSWD"
 
 sleep 1
 
 arch-chroot /mnt /bin/bash <<EOF_CHROOT
 
 echo $USERNAME
-echo $USERNAMEPASSWD
-echo $ROOTPASSWD
+echo $USERNAME_PASSWD
+echo $ROOT_PASSWD
 
 # Use the exported variables
-root_passwd=\${ROOTPASSWD}
+root_passwd=\${ROOT_PASSWD}
 username=\${USERNAME}
-username_passwd=\${USERNAMEPASSWD}
+username_passwd=\${USERNAME_PASSWD}
 
 echo $username
 echo $root_passwd
