@@ -217,7 +217,7 @@ configure_network() {
     sleep 2
     (echo y) | pacman -S networkmanager dhcpcd
     systemctl enable NetworkManager
-    systemctl enable dhcpcd	    		    		    		   
+    systemctl enable dhcpcd
 }
 
 installing_grub() {
@@ -232,14 +232,14 @@ installing_grub() {
 configure_new_user() {
     echo "Setting root password..."
     sleep 2
-    (echo $root_passwd) | passwd
+    (echo ${root_passwd}) | passwd
 
     echo "Creating user and the sudo..."
     sleep 2
     useradd -m -G wheel $username
-    echo "Setting the password for user $username..."
+    echo "Setting the password for user ${username}..."
     sleep 2
-    (echo $username_passwd) | passwd $username	
+    (echo ${username_passwd}) | passwd $username
 }
 
 
@@ -249,7 +249,7 @@ configure_sudo() {
     (echo y) | pacman -S sudo vim
     echo "Configuring sudo..."
     sleep 2
-    EDITOR=vim visudo	
+    EDITOR=vim visudo
 }
 
 
