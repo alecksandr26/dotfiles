@@ -22,6 +22,7 @@ partition_disk() {
 (
 echo n # New partition
 echo p
+echo 1
 echo   # First sector (Accept default: 1)
 echo +512M # Last sector (Accept default: varies)
 echo t # Change partition type
