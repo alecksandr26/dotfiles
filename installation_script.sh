@@ -20,7 +20,6 @@ check_internet() {
 partition_disk() {
     echo "Partitioning the disk..."
 (
-echo g # Create a new GPT partition table
 echo n # New partition
 echo p
 echo   # First sector (Accept default: 1)
