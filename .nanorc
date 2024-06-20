@@ -1,0 +1,13 @@
+
+# Enable the mouse
+set mouse
+
+# Add number lines 
+set linenumbers
+
+# To move backward and forward
+bind ^B left main
+bind ^F right main
+
+## Include all syntax highlighting files
+include /usr/share/nano/*.nanorc

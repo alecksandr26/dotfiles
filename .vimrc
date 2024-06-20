@@ -16,4 +16,8 @@ runtime! archlinux.vim
 
 " do not load defaults if ~/.vimrc is missing
 "let skip_defaults_vim=1
+
+" Enable the numbers and the mouse
 set nu
+set mouse=a
+

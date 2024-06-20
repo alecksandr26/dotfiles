@@ -287,7 +287,7 @@ configure_new_user() {
     mkdir /home/"\$USERNAME"/Pictures
     mkdir /home/"\$USERNAME"/Videos
     mkdir /home/"\$USERNAME"/Music
-        
+    chown -R "\$USERNAME" /home/"\$USERNAME"/
     
     echo "Setting the password for user "\$USERNAME"..."
     sleep 2
