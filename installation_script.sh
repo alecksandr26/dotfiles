@@ -17,17 +17,18 @@ check_internet() {
     fi
 }
 
-
-
 partition_disk() {
     local disk=$1
     echo "Partitioning the disk..."
-(
+    sleep 1
+    read -p "Put the size of efi partition (e.g., 512M): " efi_size
+    read -p "Put the size of swap partition (e.g., 4G): " swap_size
+    (
     echo g # Create a new GPT partition table
     echo n # Add a new partition
     echo 1 # Partition number
     echo   # First sector (Accept default: 1)
-    echo +512M # Last sector
+    echo "+$efi_size" # Last sector
     echo t # Change partition type
     echo 1 # Select partition 1
     # echo 1 # Type EFI System
@@ -35,7 +36,7 @@ partition_disk() {
     echo n # Add a new partition
     echo 2 # Partition number
     echo   # First sector (Accept default: next free)
-    echo +4G # Last sector
+    echo "+$swap_size" # Last sector
     echo t # Change partition type
     echo 2 # Select partition 2
     echo 19 # Type Linux swap
@@ -49,15 +50,15 @@ partition_disk() {
     echo 20 # Type Linux filesystem
 
     echo w # Write changes
-) | fdisk $disk
+    ) | fdisk $disk
 
-# Check if fdisk commands executed successfully
-if [ $? -ne 0 ]; then
-    echo "Partitioning failed. Please check the fdisk commands and try again."
-    exit 1
-else
-    echo "Disk partitioning completed successfully."
-fi
+    # Check if fdisk commands executed successfully
+    if [ $? -ne 0 ]; then
+	echo "Partitioning failed. Please check the fdisk commands and try again."
+	exit 1
+    else
+	echo "Disk partitioning completed successfully."
+    fi
 }
 
 formatting() {
@@ -170,11 +171,41 @@ sleep 2
 
 
 read -r -p "Put the hostname: " hostname
-read -s -r -p "Put the root's passwd: " root_passwd
-echo ""
+while true; do
+    # Prompt user to enter root password
+    read -s -r -p "Put the root's passwd: " root_passwd
+    echo ""
+
+    # Prompt user to re-enter root password
+    read -s -r -p "Re-enter the root's passwd: " root_passwd_confirm
+    echo ""
+
+    # Check if passwords match
+    if [ "$root_passwd" != "$root_passwd_confirm" ]; then
+        echo "Passwords do not match. Please try again."
+    else
+        echo "Passwords match."
+        break  # Exit the loop if passwords match
+    fi
+done
 read -r -p "Put an username: " username
-read -s -r -p "Put username's passwd: " username_passwd
-echo ""
+while true; do
+    # Prompt user to enter user's password
+    read -s -r -p "Put user's passwd: " user_passwd
+    echo ""
+
+    # Prompt user to re-enter user's password
+    read -s -r -p "Re-enter user's passwd: " user_passwd_confirm
+    echo ""
+
+    # Check if passwords match
+    if [ "$user_passwd" != "$user_passwd_confirm" ]; then
+        echo "Passwords do not match. Please try again."
+    else
+        echo "Passwords match."
+        break  # Exit the loop if passwords match
+    fi
+done
 
 # Export variables to be available in arch-chroot
 # The issue you're encountering stems from how variables are expanded within a here document (<<EOF). Specifically, variables inside a here document are subject to expansion at the time the here document is parsed, not when it's executed. This can lead to unexpected behavior, especially with special characters like # and $.
@@ -190,16 +221,12 @@ export DISK_DEVICE=$disk_device
 export HOSTNAME=$hostname
 export USERNAME=$username
 export ROOT_PASSWD=$root_passwd
-export USER_PASSWD=$username_passwd
+export USER_PASSWD=$user_passwd
 
 sleep 1
 
 arch-chroot /mnt /bin/bash <<EOF
 #!/usr/bin/env bash
-
-
-echo "\$ROOT_PASSWD"
-echo "\$USER_PASSWD"
 
 configure_system() {
     echo "Setting timezone..."
@@ -247,9 +274,9 @@ configure_new_user() {
     sleep 2
     (echo root:"\$ROOT_PASSWD") | chpasswd
 
-    echo "Creating user and the sudo..."
+    echo "Creating user "\$USERNAME"..."
     sleep 2
-    useradd -m -G wheel $USERNAME
+    useradd -m -G wheel,sys,rfkill,input  "\$USERNAME"
     echo "Setting the password for user "\$USERNAME"..."
     sleep 2
     (echo "\$USERNAME":"\$USER_PASSWD") | chpasswd
@@ -259,10 +286,10 @@ configure_new_user() {
 configure_sudo() {
     echo "Installing sudo..."
     sleep 2
-    (echo y) | pacman -S sudo vim
+    (echo y) | pacman -S sudo
     echo "Configuring sudo..."
     sleep 2
-    EDITOR=vim visudo
+    sed -i 's/# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/' /etc/sudoers
 }
 
 
@@ -296,8 +323,8 @@ fi
 
 
 # 12. Exit archiso and Reboot
-echo "Exiting chroot and rebooting..."
-read -n1 -r -p "Press any key to continue..." key
+echo "Exiting chroot, umounting and rebooting..."
+sleep 2
 echo "Umounting recursive /mnt/..."
 sleep 1
 umount -R /mnt
@@ -308,8 +335,12 @@ else
     echo "Umounting /mnt/ success."
 fi
 
+echo "swappingoff /dev/sda2"
+sleep 1
 swapoff /dev/sda2
 
+
+read -n1 -r -p "Press any key to reboot the system..." key
 echo "Rebooting..."
 sleep 2
 reboot
