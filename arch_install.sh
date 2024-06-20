@@ -296,14 +296,14 @@ configure_new_user() {
 
 
 configure_sudo() {
-    echo "Installing sudo..."
+    echo "Setting sudo..."
     sleep 2
+    echo "Installing sudo..."
     (echo y) | pacman -S sudo
     echo "Configuring sudo..."
     sleep 2
     sed -i 's/# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/' /etc/sudoers
 }
-
 
 # 7. Configure the System
 configure_system
@@ -321,7 +321,7 @@ configure_new_user
 
 
 # 11. Set sudo
-# configure_sudo
+configure_sudo
 
 
 EOF
