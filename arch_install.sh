@@ -248,7 +248,7 @@ configure_system() {
     echo "Setting hostname..."
     sleep 2
     echo "\$HOSTNAME" > /etc/hostname
-    echo -e "127.0.0.1 \t localhost \n ::1 \t \t localhost \n 127.0.1.1 \t arch.localdomain \t arch" >> /etc/hosts 
+    echo -e "127.0.0.1 \t localhost \n ::1 \t \t localhost \n 127.0.1.1 \t "\$HOSTNAME".localdomain \t "\$HOSTNAME"" >> /etc/hosts 
 }
 
 
@@ -261,11 +261,14 @@ configure_network() {
 }
 
 installing_grub() {
-    echo "Installing GRUB boot loader..."
+    echo "Downloading GRUB boot loader..."
     sleep 2
     (echo y) | pacman -S grub efibootmgr
+    echo "Installing GRUB boot loader..."
+    sleep 2
     grub-install --target=x86_64-efi --efi-directory=/boot/ --bootloader-id=GRUB
     echo "Configuring GRUB..."
+    sleep 1
     grub-mkconfig -o /boot/grub/grub.cfg
 }
 
@@ -277,6 +280,15 @@ configure_new_user() {
     echo "Creating user "\$USERNAME"..."
     sleep 2
     useradd -m -G wheel,sys,rfkill,input  "\$USERNAME"
+    echo "Creating basic folders to "\$USERNAME""
+    sleep 2
+    mkdir /home/"\$USERNAME"/Downloads
+    mkdir /home/"\$USERNAME"/Documents
+    mkdir /home/"\$USERNAME"/Pictures
+    mkdir /home/"\$USERNAME"/Videos
+    mkdir /home/"\$USERNAME"/Music
+        
+    
     echo "Setting the password for user "\$USERNAME"..."
     sleep 2
     (echo "\$USERNAME":"\$USER_PASSWD") | chpasswd
@@ -318,7 +330,7 @@ if [ $? -ne 0 ]; then
     echo "Chrooting failed."
     exit 1
 else
-    echo "Chrooting success."
+    echo "Chrooting configuration was success."
 fi
 
 
@@ -338,7 +350,6 @@ fi
 echo "swappingoff /dev/sda2"
 sleep 1
 swapoff /dev/sda2
-
 
 read -n1 -r -p "Press any key to reboot the system..." key
 echo "Rebooting..."
