@@ -4,9 +4,15 @@ su root
 
 # 1. Installing Xorg and I3 (dmenu, feh) The window server
 (
-    echo all
+    echo ""
+    echo ""
     echo y
-) | pacman -S xorg i3
+    echo y
+    echo ""
+    echo ""
+    echo y
+    echo y
+) | pacman -S xorg xorg-xinit i3 dmenu
 
 
 
