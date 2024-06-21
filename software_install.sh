@@ -7,7 +7,10 @@ sleep 2
 cd ~/Downloads
 git clone https://aur.archlinux.org/yay.git
 cd yay/
-makepkg -si
+(
+    echo "y"
+    echo "y"
+) | makepkg -si
 
 
 # 2. Downloading my dotfiles
@@ -111,7 +114,8 @@ echo "Installing dev tools..."
 sleep 2
 (
     echo "y"
-) | sudo pacman -S clang texlive-latex texlive-latexrecommended texlive-latexextra rust crystal clisp sbcl nasm mingw-w64-gcc wine emacs
+) | sudo pacman -S clang texlive-latex texlive-latexrecommended texlive-latexextra rust crystal clisp sbcl nasm mingw-w64-gcc wine emacs gdb
+
 
 
 # 8.1 Configuring dev tools
@@ -120,6 +124,21 @@ sleep 2
 cp .emacs ~/
 systemctl --user enable emacs
 sudo cp ema /usr/bin/
+
+# 8.2 Configuring ssh pair of keys
+echo "Installing openssh..."
+sleep 2
+(
+    echo "y"
+) | sudo pacman -S openssh
+
+echo "Configuring ssh pair of keys..."
+sleep 2
+(
+    echo ""
+    echo ""
+    echo ""
+) | ssh-keygen -t rsa -b 4096
 
 
 # 9. Installing basic utilies (xclip, scrot)
@@ -159,8 +178,13 @@ sleep 2
 
 # 14. Rebooting
 read -n1 -r -p "Press any key to reboot the system..." key
+echo "Removing $0..."
+sleep 2
+rm ~/$0
 echo "Rebooting the system..."
 sleep 2
+
+
 reboot
 
 
