@@ -146,7 +146,7 @@ echo "Installing virtualization software (qemu)..."
 sleep 2
 (
     echo "y"
-) | sudo pacman -S qemu-base
+) | sudo pacman -S qemu-full
 
 # 13. Installing steam and discord
 echo "Installing steam and discord..."
@@ -154,6 +154,12 @@ sleep 2
 (
     echo "y"
 ) | sudo pacman -S noto-fonts-emoji discord ttf-liberation steam
+
+# 14. Rebooting
+read -n1 -r -p "Press any key to reboot the system..." key
+echo "Rebooting the system..."
+sleep 2
+reboot
 
 
 
