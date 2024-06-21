@@ -20,4 +20,4 @@ runtime! archlinux.vim
 " Enable the numbers and the mouse
 set nu
 set mouse=a
-
+syntax on

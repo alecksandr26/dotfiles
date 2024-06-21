@@ -27,7 +27,7 @@ sleep 2
     echo ""
     echo ""
     echo y
-) | sudo pacman -S xorg xorg-xinit i3 dmenu 
+) | sudo pacman -S xorg xorg-xinit i3 dmenu picom
 
 # 3.1. Installing drivers
 echo "Installing drivers..."
@@ -55,6 +55,8 @@ sudo cp 20-amdgpu.conf /etc/X11/xorg.conf.d/
 mkdir -p ~/.config/
 mkdir -p ~/.config/i3/
 cp config ~/.config/i3/
+mkdir -p ~/.config/picom/
+cp picom.conf ~/.config/picom/
 
 # 5. Pulse Audio The server audio and Alsa drivers
 echo "Installing Pulse Audio..."
