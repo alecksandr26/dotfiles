@@ -199,7 +199,8 @@ bindsym --release Print exec scrot 'ArcoLinux-%Y-%m-%d-%H-%s_screenshot.png' -s 
 
 bindsym $mod+Ctrl+space exec (setxkbmap -query | grep -q "layout:\s\+us") && setxkbmap -layout latam || setxkbmap us
 
-exec feh --bg-scale /home/alecksandr/Pictures/Wallpapers/pexels-cottonbro-5473951.jpg
+# Setting the wallpaper
+exec feh --bg-scale /home/"$USER"/Pictures/Wallpapers/skyrim.jpg
 
 # To be able to do zoom install booomer
 bindsym $mod+z exec boomer
