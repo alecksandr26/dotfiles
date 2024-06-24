@@ -114,7 +114,7 @@ echo "Installing dev tools..."
 sleep 2
 (
     echo "y"
-) | sudo pacman -S clang texlive-latex texlive-latexrecommended texlive-latexextra rust crystal clisp sbcl nasm mingw-w64-gcc wine emacs gdb
+) | sudo pacman -S clang texlive-latex texlive-latexrecommended texlive-latexextra rust crystal clisp sbcl nasm mingw-w64-gcc wine emacs gdb global
 
 
 
