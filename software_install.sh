@@ -94,13 +94,13 @@ cp kitty.conf ~/.config/kitty/
 cp .nanorc ~/
 cp .vimrc ~/
 
-# 7. Installing basic graphics tools (chromium, thunar, pavucontrol, vlc)
+# 7. Installing basic graphics tools (chromium, thunar, pavucontrol, vlc)...
 echo "Installing basic graphics tools (chromium, thunar, pavucontrol, vlc)..."
 sleep 2
 (
     echo ""
     echo "y"
-) | sudo pacman -S chromium thunar gvfs tumbler ffmpegthumbnailer pavucontrol vlc feh mypaint
+) | sudo pacman -S chromium thunar gvfs tumbler ffmpegthumbnailer pavucontrol libdvdcss vlc feh mypaint
 
 # 7.1 Configuring graphical stuff
 echo "Configuring graphical stuff..."
@@ -114,7 +114,7 @@ echo "Installing dev tools..."
 sleep 2
 (
     echo "y"
-) | sudo pacman -S clang texlive-latex texlive-latexrecommended texlive-latexextra rust crystal clisp sbcl nasm mingw-w64-gcc wine emacs gdb global
+) | sudo pacman -S clang texlive-latex texlive-latexrecommended texlive-latexextra rust crystal clisp sbcl nasm mingw-w64-gcc wine emacs gdb global valgrind radare2
 
 
 
@@ -146,7 +146,7 @@ echo "Installing basic utilies (xclip, scrot)..."
 sleep 2
 (
     echo "y"
-) | sudo pacman -S xclip scrot
+) | sudo pacman -S xclip maim
 
 # 10. Installing recording tools (obs-studio, audacity)
 echo "Installing recording tools (obs-studio, audacity)..."
@@ -169,14 +169,25 @@ sleep 2
     echo "y"
 ) | sudo pacman -S qemu-full
 
-# 13. Installing steam and discord
-echo "Installing steam and discord..."
+# 13. Installing steam, discord and xbox controller drivers 
+echo "Installing steam, discord and xbox controller drivers..."
 sleep 2
 (
     echo "y"
-) | sudo pacman -S noto-fonts-emoji discord ttf-liberation steam
+) | sudo pacman -S noto-fonts-emoji discord ttf-liberation steam linux-headers dkms xpad
 
-# 14. Rebooting
+# 13.1 Cofniguing the drivers of xbox controller
+# echo "Configuing the drivers of xbox controller..."
+# sudo modprobe xpad
+
+
+
+# 14. Configuring the hibernation
+echo "Configuring the hibernation..."
+sudo sed -i 's/^GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX="quiet resume=\/dev\/sda2"/' /etc/default/grub
+
+
+# 15. Rebooting
 read -n1 -r -p "Press any key to reboot the system..." key
 echo "Removing $0..."
 sleep 2
