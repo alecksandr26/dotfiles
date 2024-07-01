@@ -117,7 +117,6 @@ sleep 2
 ) | sudo pacman -S clang texlive-latex texlive-latexrecommended texlive-latexextra rust crystal clisp sbcl nasm mingw-w64-gcc wine emacs gdb global valgrind radare2
 
 
-
 # 8.1 Configuring dev tools
 echo "Configuring dev tools..."
 sleep 2
@@ -141,8 +140,8 @@ sleep 2
 ) | ssh-keygen -t rsa -b 4096
 
 
-# 9. Installing basic utilies (xclip, scrot)
-echo "Installing basic utilies (xclip, scrot)..."
+# 9. Installing basic utilies (xclip, maim)
+echo "Installing basic utilies (xclip, maim)..."
 sleep 2
 (
     echo "y"
@@ -200,6 +199,13 @@ sudo systemctl enable cups
 sudo systemctl start cups
 
 
+# 16. Installing torrent software (transmission-cli)...
+echo "Installing torrent software (transmission-cli)..."
+sleep 2
+(
+    echo "y"
+) | sudo pacman -S transmission-cli
+
 # 16. Rebooting
 read -n1 -r -p "Press any key to reboot the system..." key
 echo "Removing $0..."
@@ -208,11 +214,7 @@ rm ~/$0
 echo "Rebooting the system..."
 sleep 2
 
-
 reboot
-
-
-
 
 
 
