@@ -181,13 +181,26 @@ sleep 2
 # sudo modprobe xpad
 
 
-
 # 14. Configuring the hibernation
 echo "Configuring the hibernation..."
 sudo sed -i 's/^GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX="quiet resume=\/dev\/sda2"/' /etc/default/grub
 
 
-# 15. Rebooting
+# 15. Installing the hp printer drivers (hlip, cups)
+echo "Installing the hp printer drivers (hlip, cups)..."
+sleep 2
+(
+    echo "y"
+) | sudo pacman -S hplip cups
+
+# 15.1 Configuring the hp printer drivers (cups)
+echo "Configuring the hp printer drivers (cups)..."
+sleep 2
+sudo systemctl enable cups
+sudo systemctl start cups
+
+
+# 16. Rebooting
 read -n1 -r -p "Press any key to reboot the system..." key
 echo "Removing $0..."
 sleep 2
