@@ -84,6 +84,12 @@
 (set-frame-parameter nil 'alpha-background 90)
 (add-to-list 'default-frame-alist '(alpha-background . 90))
 
+;; Ensure new frames created by the emacsclient also inherit the transparency setting
+(defun set-frame-transparency (frame)
+  (set-frame-parameter frame 'alpha-background 90))
+
+(add-hook 'after-make-frame-functions 'set-frame-transparency)
+
 ;; dired
 ;; To add a new file to the current listed direcotry 
 (defun my-dired-add-file-here ()
