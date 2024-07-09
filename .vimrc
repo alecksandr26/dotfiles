@@ -17,8 +17,12 @@ runtime! archlinux.vim
 " do not load defaults if ~/.vimrc is missing
 "let skip_defaults_vim=1
 
-" Enable the numbers and the mouse
+" By basic configuration
+syntax on
 set nu
 set mouse=a
-syntax on
 color torte
+" To make that vim puts all the yank information in the clipboard
+set clipboard=unnamedplus
+
+

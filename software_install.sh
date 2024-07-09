@@ -114,7 +114,7 @@ echo "Installing dev tools..."
 sleep 2
 (
     echo "y"
-) | sudo pacman -S clang texlive-latex texlive-latexrecommended texlive-latexextra rust crystal clisp sbcl nasm mingw-w64-gcc wine emacs gdb global valgrind radare2
+) | sudo pacman -S clang texlive-latex texlive-latexrecommended texlive-latexextra rust crystal clisp sbcl nasm mingw-w64-gcc wine emacs gdb global valgrind radare2 man-pages
 
 
 # 8.1 Configuring dev tools
@@ -158,6 +158,7 @@ sleep 2
 echo "Installing editing software"
 sleep 2
 (
+    echo "1"
     echo "y"
 ) | sudo pacman -S kdenlive gimp
 
@@ -206,7 +207,20 @@ sleep 2
     echo "y"
 ) | sudo pacman -S transmission-cli
 
-# 16. Rebooting
+
+# 17. Installing network software
+echo "Installing network software (net-tools, openvpn)..."
+sleep 2
+(
+    echo "y"
+) | sudo pacman -S net-tools
+sleep 2
+(
+    echo "y"
+) | yay -S openvpn
+
+
+# 18. Rebooting
 read -n1 -r -p "Press any key to reboot the system..." key
 echo "Removing $0..."
 sleep 2
