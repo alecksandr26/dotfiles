@@ -84,6 +84,7 @@ sleep 2
 
 # Guides for the weird software:
 # nnn: https://opensource.com/article/22/12/linux-file-manager-nnn
+# nnn: Usage https://github.com/jarun/nnn/wiki/Usage#keyboard-mouse
 
 # 6.1 Configure the terminal emulator stuff
 echo "Configuring terminal emulator stuff (Kitty, Tmux, Nano, Vim, nnn)..."

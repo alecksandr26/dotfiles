@@ -132,6 +132,11 @@
 (setq org-format-latex-options (plist-put org-format-latex-options :scale 1.4))
 
 
+;; Enable the debug
+;; To solve this problem of: wrong type argument: stringp, nil
+;; https://stackoverflow.com/questions/5413959/wrong-type-argument-stringp-nil
+;; (setq debug-on-error t)
+
 ;; -------------------------------------------------------------------------------------------
 ;; Initialized the package manager
 
@@ -147,7 +152,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(rjsx-mode company-auctex slime-company elpy cpputils-cmake cmake-ide cmake-mode company-c-headers smex fixmee multi-vterm vterm iedit ggtags yasnippet-snippets yasnippet multiple-cursors projectile magit-todos magit company)))
+   '(cmake-mode rjsx-mode company-auctex slime-company elpy cpputils-cmake company-c-headers smex fixmee multi-vterm vterm iedit ggtags yasnippet-snippets yasnippet multiple-cursors projectile magit-todos magit company)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -199,7 +204,29 @@
 ;; https://github.com/flycheck/flycheck/tree/7ee95638c64821e9092a40af12b1095aa5604fa5
 (use-package flycheck
   :ensure t
-  :hook (after-init . global-flycheck-mode))
+  :hook (after-init . global-flycheck-mode)
+  :config
+  ;; Add custom include path for C++
+  (add-hook 'c++-mode-hook
+            (lambda ()
+              ;; (setq flycheck-clang-include-path
+              ;;       (list (expand-file-name "/usr/lib/qt/")
+	      ;; 		   (expand-file-name "/usr/include/qt/QtWidgets")
+	      ;; 		   (expand-file-name "/usr/include/qt/QtGui")
+	      ;; 		   (expand-file-name "/usr/include/qt/QtCore")
+	      ;; 		   ))
+	      
+	      ;; Enable syntax-only checks, so you need install 'sudo pacman -S cppcheck'
+              ;; (setq flycheck-disabled-checkers '(c/c++-clang c/c++-gcc))
+              ;; (flycheck-select-checker 'c/c++-cppcheck)
+	      
+	      ;; Set include paths for cppcheck
+              (setq flycheck-cppcheck-include-path '("/usr/include" "/usr/lib/qt/include"))
+	      
+              ;; Add suppressions
+              (setq flycheck-cppcheck-suppressions '())
+	      
+	      )))
 
 ;; projectile
 ;; https://docs.projectile.mx/projectile/index.html
@@ -234,12 +261,10 @@
   :config
   (yas-reload-all))
 
-
 ;; yasnippet-snippets
 ;; https://github.com/AndreaCrotti/yasnippet-snippets
 (use-package yasnippet-snippets
   :ensure t)
-
 
 ;; ggtags, alternative to rtags
 ;; https://elpa.gnu.org/packages/ggtags.html
@@ -256,7 +281,6 @@
   :ensure t
   :bind ("C-c ;" . iedit-mode)
   )
-
 
 ;; vterm
 ;; https://github.com/akermu/emacs-libvterm
@@ -304,7 +328,10 @@
   :config
   (add-to-list 'company-backends 'company-c-headers)
   (add-to-list 'company-c-headers-path-system "/usr/include/")
-  (add-to-list 'company-c-headers-path-system "/usr/include/c++/14.1.1/"))
+  (add-to-list 'company-c-headers-path-system "/usr/include/c++/14.2.1/")
+  ;; (add-to-list 'company-c-headers-path-system "/usr/include/qt/")
+  ;; (add-to-list 'company-c-headers-path-system "/usr/include/qt/*/")
+  )
 
 ;; rtags
 ;; Install manually: https://github.com/Andersbakken/rtags#tldr-quickstart
@@ -335,14 +362,16 @@
 ;; https://github.com/redguardtoo/cpputils-cmake
 (use-package cpputils-cmake
   :ensure t
-  :hook (c-mode-common . (lambda ()
-                           (when (derived-mode-p 'c-mode 'c++-mode)
-                             (cppcm-reload-all))))
+  :hook
+  (c-mode-common . (lambda ()
+                     (when (derived-mode-p 'c-mode 'c++-mode)
+                       (cppcm-reload-all))))
   :config
   (global-set-key (kbd "C-c C-g")
                   '(lambda ()
                      (interactive)
-                     (gud-gdb (concat "gdb --fullname " (cppcm-get-exe-path-current-buffer))))))
+                     (gud-gdb (concat "gdb --fullname " (cppcm-get-exe-path-current-buffer)))))
+  )
 
 
 ;; -------------------------------------------------------------------------------------------
@@ -360,9 +389,15 @@
   ;; To give support for the envs in python to elpy, dont' work
   ;; follow this url: https://github.com/jorgenschaefer/elpy/issues/1727
   ;; (setenv "WORKON_HOME" "/home/aleck/")
-
-  (setq elpy-rpc-virtualenv-path 'current)
+  
+  (setq elpy-rpc-virtualenv-path "~/.emacs.d/elpy/rpc-venv/")
   :hook (elpy-mode . (lambda () (highlight-indentation-mode -1))))
+
+
+;; -------------------------------------------------------------------------------------------
+;; My Bash Packages and Configs
+
+(setq sh-basic-offset 8)
 
 
 ;; -------------------------------------------------------------------------------------------
@@ -443,9 +478,37 @@
 ;; -------------------------------------------------------------------------------------------
 ;; My Javascript Package and Configs
 
-
 ;; To set the identation of 
 ;; (setq js-indent-level 2)
+
+;; Install and configure web-mode for .tsx files
+(use-package web-mode
+  :ensure t
+  :mode ("\\.tsx?$" . web-mode)  ; Use web-mode for .ts, .tsx files
+  :config
+  (add-hook 'web-mode-hook #'yas-minor-mode)  ; Enable yasnippet in web-mode
+  (setq web-mode-enable-auto-quoting nil)     ; Disable auto-quoting in JSX/TSX
+  :custom
+  (web-mode-markup-indent-offset 2)  ; Set indentation for markup
+  (web-mode-css-indent-offset 2)     ; Set indentation for CSS
+  (web-mode-code-indent-offset 2))   ; Set indentation for code
+
+(use-package rjsx-mode
+  :ensure t
+  :mode ("\\.jsx?$" . rjsx-mode)  ; Automatically use rjsx-mode for .js and .jsx files
+  :config
+  (add-hook 'rjsx-mode-hook #'yas-minor-mode)  ; Enable yasnippet in rjsx-mode
+  (add-hook 'rjsx-mode-hook
+            (lambda ()
+              (setq js-indent-level 2))))  ; Set JS indentation level to 2 for rjsx-mode
+
+
+(use-package react-snippets
+  :ensure t
+  :after (yasnippet) ; Ensure yasnippet is loaded first
+  :config
+  (add-hook 'rjsx-mode-hook #'yas-minor-mode)
+  ) ; Enable yasnippet in rjsx-mode
 
 
 ;; -------------------------------------------------------------------------------------------
