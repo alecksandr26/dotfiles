@@ -9,45 +9,58 @@
 (menu-bar-mode -1)
 (scroll-bar-mode -1)
 
+
 ;; Config your backupfiles:
 ;; https://stackoverflow.com/questions/151945/how-do-i-control-how-emacs-makes-backup-files
 ;; https://emacs.stackexchange.com/questions/33/put-all-backups-into-one-backup-folder
-(setq backup-directory-alist '(("." . "~/.emacs-backup")))
+(setq backup-directory-alist '(("." . "~/.emacs.d/emacs-backup")))
 
-;; Create the directory '.emacs-saves'
+;; Create the directory '.emacs-saves' for emacs saves
 (setq auto-save-file-name-transforms
-      `((".*" "~/.emacs-saves/" t)))
+      `((".*" "~/.emacs.d/emacs-saves/" t)))
 
 
-;; Add the column numbers
-(setq column-number-mode t)
+;; My code style is linux kernel coding style
+;; https://www.kernel.org/doc/html/v4.10/process/coding-style.html
+;; https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines
+
+(setq-default indent-tabs-mode t)
+(setq-default tab-width 8)
+
+;; To make tbe backspace delete the tabs not convert the tab into spaces etc..
+(setq backward-delete-char-untabify-method 'nil)
+
+;; Enable electric-pair-mode for automatic insertion of matching parentheses
+(electric-pair-mode 1)
+
+
+;; Enable the debug
+;; To solve this problem of: wrong type argument: stringp, nil
+;; https://stackoverflow.com/questions/5413959/wrong-type-argument-stringp-nil
+;; (setq debug-on-error t)
+
+
+;; Emacs as Deamon
+;; https://www.emacswiki.org/emacs/EmacsAsDaemon
+;; systemctl --user enable --now emacs
+;; systemctl --user start --now emacs
+;; check: https://unix.stackexchange.com/questions/56871/emacs-daemon-crashing-after-closing-emacsclient-c
+(setq default-frame-alist '((font . "Source Code Pro SemiBold-10")))
+(add-to-list 'default-frame-alist
+             '(vertical-scroll-bars . nil))
+
+;; Checking where Im running emacs
+(if (daemonp)
+    (message "Loading in the daemon!")
+  (message "Loading in regular Emacs!")
+  )
+
+;; -------------------------------------------------------------------------------------------
+;; Theme, Font, Trans, etc ... configs
 
 ;; Display the number lines
 (global-display-line-numbers-mode 1)
 
-
-;; To compile code or to run commands
-(global-set-key [f5] 'compile)
-
-
-;; Shell command to be saved
-(defvar previous-shell-command nil
-  "Variable to store the previous shell command.")
-
-(defun async-shell-command-with-previous ()
-  "Run `async-shell-command` with the previously used command, if any."
-  (interactive)
-  (let ((command (read-shell-command "Shell command: " previous-shell-command)))
-    (setq previous-shell-command command)
-    (async-shell-command command)))
-
-(global-set-key [f6] 'async-shell-command-with-previous)
-
-;; To open a new frame of emacs
-(global-set-key (kbd "C-c C-f") 'display-buffer-other-frame)
-
-;; Load themes manually
-;; For more themes: https://emacsthemes.com/
 (add-to-list 'custom-theme-load-path "~/.emacs.d/themes/")
 
 ;; Theme torte: https://stackoverflow.com/questions/14811454/vim-torte-colorscheme-for-emacs
@@ -69,16 +82,7 @@
 (load-theme 'monokai-pro-classic t)
 
 ;; Set the font
-(set-frame-parameter nil 'font "Source Code Pro SemiBold-10")
-
-;; My code style is linux kernel coding style
-;; https://www.kernel.org/doc/html/v4.10/process/coding-style.html
-;; https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines
-
-(setq-default indent-tabs-mode t)
-(setq-default tab-width 8)
-(defvaralias 'c-basic-offset 'tab-width)
-(setq backward-delete-char-untabify-method 'nil)
+(set-frame-parameter nil 'font "Source Code Pro Semibold-10")
 
 ;; To make emacs transparent
 (set-frame-parameter nil 'alpha-background 90)
@@ -89,6 +93,31 @@
   (set-frame-parameter frame 'alpha-background 90))
 
 (add-hook 'after-make-frame-functions 'set-frame-transparency)
+
+
+;; -------------------------------------------------------------------------------------------
+;; Key bindings config
+
+;; To compile code or to run commands
+(global-set-key [f5] 'compile)
+
+;; Shell command to be saved
+(defvar previous-shell-command nil
+  "Variable to store the previous shell command.")
+
+(defun async-shell-command-with-previous ()
+  "Run `async-shell-command` with the previously used command, if any."
+  (interactive)
+  (let ((command (read-shell-command "Shell command: " previous-shell-command)))
+    (setq previous-shell-command command)
+    (async-shell-command command)))
+
+;; To run commands with input and output streams
+(global-set-key [f6] 'async-shell-command-with-previous)
+
+;; To open a new frame of emacs
+(global-set-key (kbd "C-c C-f") 'display-buffer-other-frame)
+
 
 ;; dired
 ;; To add a new file to the current listed direcotry 
@@ -101,29 +130,14 @@
 (global-set-key (kbd "C-+") 'my-dired-add-file-here)
 
 
+
+;; -------------------------------------------------------------------------------------------
+;; Native Packages config
+
 ;; ido - To autocomplete the buffers names
 ;; https://www.gnu.org/software/emacs/manual/html_mono/ido.html#Overview
 (require 'ido)
 (ido-mode t)
-
-
-;; Enable electric-pair-mode for automatic insertion of matching parentheses
-(electric-pair-mode 1)
-
-;; Emacs as Deamon
-;; https://www.emacswiki.org/emacs/EmacsAsDaemon
-;; systemctl --user enable --now emacs
-;; systemctl --user start --now emacs
-;; check: https://unix.stackexchange.com/questions/56871/emacs-daemon-crashing-after-closing-emacsclient-c
-(setq default-frame-alist '((font . "Source Code Pro SemiBold-10")))
-(add-to-list 'default-frame-alist
-             '(vertical-scroll-bars . nil))
-
-;; Checking where Im running emacs
-(if (daemonp)
-    (message "Loading in the daemon!")
-  (message "Loading in regular Emacs!")
-  )
 
 
 ;; org mode
@@ -132,18 +146,18 @@
 (setq org-format-latex-options (plist-put org-format-latex-options :scale 1.4))
 
 
-;; Enable the debug
-;; To solve this problem of: wrong type argument: stringp, nil
-;; https://stackoverflow.com/questions/5413959/wrong-type-argument-stringp-nil
-;; (setq debug-on-error t)
-
 ;; -------------------------------------------------------------------------------------------
 ;; Initialized the package manager
 
 (require 'package)
+
 (package-initialize)
+
 (add-to-list 'package-archives
-             '("melpa" . "http://melpa.org/packages/") t)
+        '("melpa-stable" . "http://stable.melpa.org/packages/"))
+    
+(add-to-list 'package-archives
+        '("melpa" . "http://melpa.org/packages/"))
 
 
 (custom-set-variables
@@ -152,13 +166,19 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(cmake-mode rjsx-mode company-auctex slime-company elpy cpputils-cmake company-c-headers smex fixmee multi-vterm vterm iedit ggtags yasnippet-snippets yasnippet multiple-cursors projectile magit-todos magit company)))
+   '(react-snippets rjsx-mode company-auctex elpy cpputils-cmake cmake-mode company-c-headers fixmee multi-vterm vterm yasnippet-snippets flycheck magit-todos magit seq company smex use-package)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+
+;; M-x package-install -> use-package
+(require 'use-package)
+
+(setq package-install-upgrade-built-in t)
+
 
 ;; -------------------------------------------------------------------------------------------
 ;; General package configs
@@ -175,6 +195,7 @@
 	 ;; This is your old M-x.
          ("C-c C-c M-x" . execute-extended-command)))
 
+
 ;; company
 ;; https://company-mode.github.io/
 (use-package company
@@ -183,8 +204,12 @@
   :config
   (setq company-idle-delay 0)
   (setq company-minimum-prefix-length 1)
+  
   ;; Remove company-capf becuase it doesn't works
-  (setq company-backends (delete 'company-semantic (delete 'company-capf company-backends))))
+  ;; (setq company-backends (delete 'company-semantic (delete 'company-capf company-backends)))
+  )
+
+
 
 ;; magit
 ;; https://github.com/magit/magit/tree/2ed93504778c9ec2b8f56665cbdeae348146fbf7
@@ -192,13 +217,14 @@
 (use-package magit
   :ensure t)
 
+
 ;; magit-todos
 ;; IMPORTANT: install ripgrep
 ;; https://github.com/alphapapa/magit-todos/tree/debb77b3589f2d83c8b43706edc1f8f90bf1ad91
 (use-package magit-todos
+  :ensure t
   :after magit
   :config (magit-todos-mode 1))
-
 
 ;; flycheck
 ;; https://github.com/flycheck/flycheck/tree/7ee95638c64821e9092a40af12b1095aa5604fa5
@@ -221,12 +247,13 @@
               ;; (flycheck-select-checker 'c/c++-cppcheck)
 	      
 	      ;; Set include paths for cppcheck
-              (setq flycheck-cppcheck-include-path '("/usr/include" "/usr/lib/qt/include"))
+              ;; (setq flycheck-cppcheck-include-path '("/usr/include" "/usr/lib/qt/include"))
 	      
               ;; Add suppressions
-              (setq flycheck-cppcheck-suppressions '())
+              ;;(setq flycheck-cppcheck-suppressions '())
 	      
 	      )))
+
 
 ;; projectile
 ;; https://docs.projectile.mx/projectile/index.html
@@ -238,7 +265,6 @@
   (setq projectile-project-search-path '("~/Documents/projects/"))
   :config
   (projectile-mode +1))
-
 
 ;; multiple-cursors
 ;; https://github.com/magnars/multiple-cursors.el
@@ -266,14 +292,18 @@
 (use-package yasnippet-snippets
   :ensure t)
 
+
 ;; ggtags, alternative to rtags
 ;; https://elpa.gnu.org/packages/ggtags.html
 ;; Download global here: https://www.gnu.org/software/global/
+;; Or if you are in debian
+;; apt install global exuberant-ctags
 (use-package ggtags
   :ensure t
   :hook ((c-mode-common . (lambda ()
                             (when (derived-mode-p 'c-mode 'c++-mode 'java-mode 'asm-mode)
                               (ggtags-mode 1))))))
+
 
 ;; iedit configuration
 ;; https://github.com/victorhge/iedit/tree/dd5d75b38ee0c52ad81245a8e5c932d3f5c4772d
@@ -328,10 +358,12 @@
   :config
   (add-to-list 'company-backends 'company-c-headers)
   (add-to-list 'company-c-headers-path-system "/usr/include/")
-  (add-to-list 'company-c-headers-path-system "/usr/include/c++/14.2.1/")
+  (add-to-list 'company-c-headers-path-system "/usr/include/c++/12/")
+  ;; (add-to-list 'company-c-headers-path-system "/usr/include/c++/14.2.1/")
   ;; (add-to-list 'company-c-headers-path-system "/usr/include/qt/")
   ;; (add-to-list 'company-c-headers-path-system "/usr/include/qt/*/")
   )
+
 
 ;; rtags
 ;; Install manually: https://github.com/Andersbakken/rtags#tldr-quickstart
@@ -356,6 +388,7 @@
 (use-package cmake-mode
   :ensure t)
 
+
 ;; cpputils-cmake
 ;; To give support to flycheck in code projects
 ;; and to automatically run gdb
@@ -370,9 +403,10 @@
   (global-set-key (kbd "C-c C-g")
                   '(lambda ()
                      (interactive)
-                     (gud-gdb (concat "gdb --fullname " (cppcm-get-exe-path-current-buffer)))))
+                     (gud-gdb (concat "gdb --fullname " (cppcm-get-exe-path-current-buffer)))))  
   )
 
+(defvaralias 'c-basic-offset 'tab-width)
 
 ;; -------------------------------------------------------------------------------------------
 ;; My Python Packages and Configs
@@ -394,10 +428,11 @@
   :hook (elpy-mode . (lambda () (highlight-indentation-mode -1))))
 
 
+
 ;; -------------------------------------------------------------------------------------------
 ;; My Bash Packages and Configs
 
-(setq sh-basic-offset 8)
+(setq sh-basic-offset 'tab-width)
 
 
 ;; -------------------------------------------------------------------------------------------
@@ -417,6 +452,8 @@
   :init (company-auctex-init)
   )
 
+
+
 ;; -------------------------------------------------------------------------------------------
 ;; My Clisp Package and Configs
 
@@ -426,21 +463,22 @@
 ;; https://melpa.org/#/slime
 ;; https://github.com/slime/slime
 ;; Manual: https://slime.common-lisp.dev/doc/html/
-(use-package slime
-  :ensure t
-  :init
-  (setq inferior-lisp-program "sbcl")
-  )
+
+;; (use-package slime
+;;   :ensure t
+;;   :init
+;;   (setq inferior-lisp-program "sbcl")
+;;   )
 
 
 ;; slime-company
 ;; https://github.com/anwyn/slime-company
-(use-package slime-company
-  :ensure t
-  :init
-  (slime-setup '(slime-fancy slime-company))
-  )
 
+;; (use-package slime-company
+;;   :ensure t
+;;   :init
+;;   (slime-setup '(slime-fancy slime-company))
+;;   )
 
 ;; -------------------------------------------------------------------------------------------
 ;; My Java Package and Configs
@@ -471,8 +509,9 @@
 
 ;; -------------------------------------------------------------------------------------------
 ;; My csharp-mode Package and Configs
-(use-package csharp-mode
-  :ensure t)
+;; (use-package csharp-mode
+;;   :ensure t)
+
 
 
 ;; -------------------------------------------------------------------------------------------
@@ -511,15 +550,12 @@
   ) ; Enable yasnippet in rjsx-mode
 
 
-;; -------------------------------------------------------------------------------------------
-;; My ReactJs Package and Configs
-(use-package rjsx-mode
+(use-package react-snippets
   :ensure t
-  :init
-  (add-to-list 'auto-mode-alist '("\\.tsx\\'" . rjsx-mode))
-  )
-
-
+  :after (yasnippet) ; Ensure yasnippet is loaded first
+  :config
+  (add-hook 'rjsx-mode-hook #'yas-minor-mode)
+  ) ; Enable yasnippet in rjsx-mode
 
 
 (message ".emacs loaded correctly")
