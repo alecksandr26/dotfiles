@@ -24,7 +24,6 @@
 ;; https://www.kernel.org/doc/html/v4.10/process/coding-style.html
 ;; https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines
 
-(setq-default indent-tabs-mode t)
 (setq-default tab-width 8)
 
 ;; To make tbe backspace delete the tabs not convert the tab into spaces etc..
@@ -166,7 +165,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(react-snippets rjsx-mode company-auctex elpy cpputils-cmake cmake-mode company-c-headers fixmee multi-vterm vterm yasnippet-snippets flycheck magit-todos magit seq company smex use-package)))
+   '(jenkinsfile-mode feature-mode react-snippets rjsx-mode company-auctex elpy cpputils-cmake cmake-mode company-c-headers fixmee multi-vterm vterm yasnippet-snippets flycheck magit-todos magit seq company smex use-package)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -216,6 +215,11 @@
 ;; Getting Started: https://magit.vc/manual/magit/Getting-Started.html
 (use-package magit
   :ensure t)
+
+(defun my-smerge-mode-hook ()
+  (local-set-key (kbd "C-c k") 'smerge-keep-current)) ; Change "C-c k" to your desired keybinding
+
+(add-hook 'smerge-mode-hook 'my-smerge-mode-hook)
 
 
 ;; magit-todos
@@ -406,7 +410,14 @@
                      (gud-gdb (concat "gdb --fullname " (cppcm-get-exe-path-current-buffer)))))  
   )
 
-(defvaralias 'c-basic-offset 'tab-width)
+
+(defun my-c-c++-mode-hook ()
+  (setq c-basic-offset 8) ; Indentation level is 4 spaces
+  (setq indent-tabs-mode t) ; Use tabs instead of spaces
+  )
+
+(add-hook 'c-mode-hook 'my-c-c++-mode-hook)
+(add-hook 'c++-mode-hook 'my-c-c++-mode-hook)
 
 ;; -------------------------------------------------------------------------------------------
 ;; My Python Packages and Configs
@@ -432,8 +443,12 @@
 ;; -------------------------------------------------------------------------------------------
 ;; My Bash Packages and Configs
 
-(setq sh-basic-offset 'tab-width)
+(defun my-bash-mode-hook ()
+  "Custom settings for Bash mode."
+  (setq indent-tabs-mode t)  ;; Use tabs for indentation
+  (setq tab-width 'tab-width))        ;; Set tab width to 4 spaces (or your preferred width)
 
+(add-hook 'sh-mode-hook 'my-bash-mode-hook)
 
 ;; -------------------------------------------------------------------------------------------
 ;; My Latex Package and Configs
@@ -558,6 +573,32 @@
   ) ; Enable yasnippet in rjsx-mode
 
 
+
+;; -------------------------------------------------------------------------------------------
+;; My Cucumber Package and Configs
+
+(use-package feature-mode
+  :ensure t
+  :mode ("\\.feature\\'" . feature-mode)
+  :config
+  (setq feature-default-language "en")
+  (add-hook 'feature-mode-hook
+            (lambda ()
+	      ;; Use spaces instead of tabs
+              (setq tab-width 2)
+              (setq indent-tabs-mode nil)
+              )))
+
+
+
+
+
+
+;; -------------------------------------------------------------------------------------------
+;; My Jenkins Package and Configs
+
+(use-package jenkinsfile-mode
+  :ensure t
+  :mode ("Jenkinsfile\\'" . jenkinsfile-mode))
+
 (message ".emacs loaded correctly")
-
-
