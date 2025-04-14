@@ -65,14 +65,14 @@
 (set-frame-parameter nil 'font "Source Code Pro Semibold-10")
 
 ;; To make emacs transparent
-(set-frame-parameter nil 'alpha-background 90)
-(add-to-list 'default-frame-alist '(alpha-background . 90))
+;; (set-frame-parameter nil 'alpha-background 90)
+;; (add-to-list 'default-frame-alist '(alpha-background . 90))
 
 ;; Ensure new frames created by the emacsclient also inherit the transparency setting
-(defun set-frame-transparency (frame)
-  (set-frame-parameter frame 'alpha-background 90))
+;; (defun set-frame-transparency (frame)
+;;   (set-frame-parameter frame 'alpha-background 90))
 
-(add-hook 'after-make-frame-functions 'set-frame-transparency)
+;; (add-hook 'after-make-frame-functions 'set-frame-transparency)
 
 
 (add-to-list 'custom-theme-load-path "~/.emacs.d/themes/")
@@ -184,8 +184,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(package-selected-packages
-   '(languagetool pyvenv python-mode super-save cmake-ide dap-mode lsp-ui lsp-mode button-lockxs yasnippet-snippets yasnippet multiple-cursors projectile jenkinsfile-mode flycheck seq magit-todos magit company smex use-package))
+ '(package-selected-packages nil)
  '(warning-suppress-types '((comp))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -269,7 +268,9 @@
 	      
               ;; Add suppressions
               ;;(setq flycheck-cppcheck-suppressions '())
-	      )))
+	      ))
+  (setq flycheck-java-language-server 'jdtls)
+  )
 
 
 ;; projectile
@@ -281,8 +282,8 @@
   :init
   (setq projectile-project-search-path '("~/Documents/projects/"))
   :config
-  (projectile-mode +1))
-
+  (projectile-mode +1)
+  (setq projectile-project-root-files-bottom-up (append '("pom.xml") projectile-project-root-files-bottom-up)))
 
 ;; multiple-cursors
 ;; https://github.com/magnars/multiple-cursors.el
@@ -364,7 +365,8 @@
 ;;   :config
 ;;   (load-theme 'monokai t))
 
-;; which-key
+;; which-key: To throw information of a shortcut
+;; https://github.com/justbur/emacs-which-ke
 (use-package which-key
   :ensure t
   :config
@@ -379,7 +381,7 @@
   (global-set-key (kbd "C-c t d") 'treemacs-select-directory)) ;; Open Treemacs in a specific directory
 
 ;; super-save: Save automatically the files when switching between buffer
-;; Install and enable super-save
+;; https://github.com/bbatsov/super-save
 (use-package super-save
   :ensure t
   :config
@@ -412,25 +414,15 @@
 ;; Stop the LanguageTool server when Emacs is exited
 (add-hook 'kill-emacs-hook #'languagetool-server-stop)
 
-
-
-;; -------------------------------------------------------------------------------------------
-;; My C/C++ Packges and Configs
-
-
-;; lsp-mode: The lenguage server for c/c++
+;; lsp-mode: The lenguage server for c/c++, python, java
 ;; https://github.com/emacs-lsp/lsp-mode
-
-;; lsp-mode needs of button-lock
-(use-package button-lock
-  :ensure t)
-
 (use-package lsp-mode
-  :hook ((c-mode c++-mode) . lsp) ;; Enable lsp for both C and C++ modes
+  :hook ((c-mode c++-mode python-mode java-mode) . lsp-deferred)
   :config
-  (setq lsp-clients-clangd-executable "clangd") ;; Path to clangd, adjust if needed
-  (setq lsp-prefer-flymake nil)) ;; Use flycheck instead of flymake
-
+  ;; Set the path to clangd for C/C++
+  (setq lsp-clients-clangd-executable "clangd")
+  ;; Use flycheck instead of flymake
+  (setq lsp-prefer-flymake nil))
 
 ;; lsp-ui: A simple ui for the lenguage server
 ;; https://github.com/emacs-lsp/lsp-ui
@@ -440,6 +432,14 @@
   (setq lsp-ui-sideline-enable t
         lsp-ui-doc-enable t
         lsp-ui-doc-delay 0.3))
+
+;; lsp-mode needs of button-lock
+(use-package button-lock
+  :ensure t)
+
+
+;; -------------------------------------------------------------------------------------------
+;; My C/C++ Packges and Configs
 
 ;; dap-mode: For debugging the program
 ;; https://github.com/emacs-lsp/dap-mode
@@ -506,6 +506,74 @@
   :ensure t
   :config
   (pyvenv-mode 1))  ;; Automatically enable pyvenv when Emacs starts
+
+;; -------------------------------------------------------------------------------------------
+;; My Java Packges and Configs
+
+
+;; # JDK (21+ recommended) Otherwise doens't work
+;; sudo pacman -S jdk-openjdk  # Arch Linux
+;; # sudo apt install openjdk-21-jdk  # Debian/Ubuntu
+
+;; # Maven
+;; sudo pacman -S maven         # Arch Linux
+;; # sudo apt install maven     # Debian/Ubuntu
+
+;; yay -S jdtls  # Install eclipse language server
+;; /usr/share/java/jdtls/bin/jdtls
+
+;; # Minimal Working Config (Emacs init.el)
+;; ;; LSP + Java
+;; (use-package lsp-mode
+;;   :ensure t
+;;   :hook (java-mode . lsp))
+;; (use-package lsp-java :ensure t :after lsp-mode)
+
+
+(use-package lsp-java
+  :ensure t
+  :after lsp-mode
+  :init
+  ;; ====== CRITICAL FIX ======
+  (setq lsp-java-java-path "/usr/lib/jvm/java-21-openjdk/bin/java")  ; Explicit Java 21
+  :config
+  ;; Set JDTLS server path (point to your installation)
+  (setq lsp-java-server-install-dir "/usr/share/java/jdtls/"
+        lsp-java-workspace-dir (expand-file-name "~/.emacs.d/java-workspace"))  ; Optional: Set workspace dir
+
+  ;; Configure JVM args for performance
+  (setq lsp-java-vmargs
+        (list "-noverify"
+              "-Xmx2G"
+              "-XX:+UseG1GC"
+              "-XX:+UseStringDeduplication"
+              "--add-opens=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED"
+              (concat "-Dlombok.path=" (expand-file-name "~/.m2/repository/org/projectlombok/lombok/"))))
+  
+  ;; Java LSP settings
+  (setq lsp-java-completion-enabled t
+        lsp-java-format-enabled t
+        lsp-java-import-order ["java" "javax" "org" "com"]
+        lsp-java-save-actions-organize-imports t
+        lsp-java-autobuild-enabled t
+        lsp-java-content-provider-preferred "fernflower")
+
+  ;; Configure JDK runtime (replace path with your JDK 17/21)
+  (setq lsp-java-configuration-runtimes
+        '[(:name "JavaSE-21" :path "/usr/lib/jvm/java-21-openjdk/" :default t)])
+
+  ;; Start LSP when opening Java files
+  (add-hook 'java-mode-hook #'lsp)
+  
+  (setq lsp-java-format-on-type-enabled nil)  ; Disable format on typing
+  (setq lsp-java-format-enabled nil)         ; Disable all formatting (if needed)
+  )
+
+  
+(use-package mvn
+  :ensure t
+  :after maven-test-mode
+  :commands (mvn-clean mvn-compile mvn-install))
 
 
 ;; init.el ends here
