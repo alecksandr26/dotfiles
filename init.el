@@ -101,6 +101,10 @@
 ;; https://www.gnu.org/software/emacs/manual/html_node/emacs/Hideshow.html
 (add-hook 'prog-mode-hook #'hs-minor-mode)
 
+;; Disable the ring bell
+(setq ring-bell-function 'ignore)
+
+
 ;; -------------------------------------------------------------------------------------------
 ;; Key bindings config
 
@@ -137,6 +141,25 @@
 
 
 
+;; Enable Shift + Wheel scroll for horizontal scrolling
+(defun my/scroll-left (&optional arg)
+  (interactive "p")
+  (scroll-left (* 15 (or arg 1))))  ;; Scroll 15 columns instead of 1
+
+(defun my/scroll-right (&optional arg)
+  (interactive "p")
+  (scroll-right (* 15 (or arg 1)))) ;; Scroll 15 columns instead of 1
+
+
+(global-set-key (kbd "<S-wheel-left>") #'my/scroll-right)
+(global-set-key (kbd "<S-wheel-right>") #'my/scroll-left)
+
+(setq hscroll-step 5)     ;; scroll by 5 columns when needed
+(setq hscroll-margin 1)   ;; start scrolling 1 column before edge
+(setq auto-hscroll-mode 'current-line) ;; only scroll when the cursor moves past edge
+
+
+
 ;; -------------------------------------------------------------------------------------------
 ;; Native Packages config
 
@@ -158,6 +181,10 @@
 (global-set-key (kbd "C-c a") #'org-agenda)
 (global-set-key (kbd "C-c c") #'org-capture)
 (setq org-format-latex-options (plist-put org-format-latex-options :scale 1.4))
+
+
+;; Activasting windmove to move between the windows 
+(windmove-default-keybindings) ;; Shift + arrow keys
 
 
 ;; -------------------------------------------------------------------------------------------
@@ -184,7 +211,12 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(package-selected-packages nil)
+ '(package-selected-packages
+   '(cmake-ide company consult diff-hl ellama fixmee iedit languagetool
+	       lsp-java lsp-ui magit-todos multi-vterm
+	       multiple-cursors mvn projectile pyvenv rg rjsx-mode
+	       smex super-save tide typescript-mode web-mode
+	       yasnippet-snippets))
  '(warning-suppress-types '((comp))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -233,7 +265,6 @@
 
 (add-hook 'smerge-mode-hook 'my-smerge-mode-hook)
 
-
 ;; magit-todos
 ;; IMPORTANT: install ripgrep
 ;; https://github.com/alphapapa/magit-todos/tree/debb77b3589f2d83c8b43706edc1f8f90bf1ad91
@@ -241,6 +272,35 @@
   :ensure t
   :after magit
   :config (magit-todos-mode 1))
+
+
+;; diff-hl
+;; To highlit the differences
+;; https://github.com/dgutov/diff-hl
+(use-package diff-hl
+  :ensure t
+  :hook ((prog-mode . diff-hl-mode)
+         (text-mode . diff-hl-mode)
+         (dired-mode . diff-hl-dired-mode)
+         (magit-post-refresh . diff-hl-magit-post-refresh))
+  :config
+  ;; Enable live diff updates (without saving)
+  (diff-hl-flydiff-mode 1)
+
+  ;; Use fringe (gutter) instead of margin
+  (diff-hl-margin-mode -1)
+  (setq diff-hl-fringe-bmp-function 'diff-hl-fringe-bmp-from-type)
+
+  ;; Update diffs on save and VC operations
+  (add-hook 'after-save-hook 'diff-hl-update)
+  (add-hook 'vc-checkin-hook 'diff-hl-update)
+
+  ;; Customize colors for better visibility
+  (custom-set-faces
+   '(diff-hl-insert ((t (:foreground "#00ff00" :background "#007700"))))
+   '(diff-hl-change ((t (:foreground "#ffff00" :background "#775500"))))
+   '(diff-hl-delete ((t (:foreground "#ff0000" :background "#770000"))))))
+
 
 
 ;; flycheck
@@ -284,6 +344,24 @@
   :config
   (projectile-mode +1)
   (setq projectile-project-root-files-bottom-up (append '("pom.xml") projectile-project-root-files-bottom-up)))
+
+;; rg
+;; https://github.com/dajva/rg.el
+;; For searching in files and that kind a stuff
+;; Usage: https://rgel.readthedocs.io/en/latest/usage.html#searching
+(use-package rg
+  :ensure t
+  :config (rg-enable-default-bindings))
+
+;; consult
+;; https://github.com/minad/consult
+;; For quick and fast search
+(use-package consult
+  :ensure t)
+
+(global-set-key [f4] 'consult-ripgrep)
+
+
 
 ;; multiple-cursors
 ;; https://github.com/magnars/multiple-cursors.el
@@ -329,6 +407,7 @@
 ;; https://github.com/suonlight/multi-vterm
 (use-package multi-vterm
   :ensure t)
+
 
 ;; fixme
 ;; C-c V - To see all the current fixme tags
@@ -389,40 +468,52 @@
   (setq super-save-auto-save-when-idle t)) ;; Save when idle
 
 ;; languagetool: Spell checker
-(use-package languagetool
-  :ensure t
-  :defer t
-  :commands (languagetool-check
-             languagetool-clear-suggestions
-             languagetool-correct-at-point
-             languagetool-correct-buffer
-             languagetool-set-language
-             languagetool-server-mode
-             languagetool-server-start
-             languagetool-server-stop))
+;; (use-package languagetool
+;;   :ensure t
+;;   :defer t
+;;   :commands (languagetool-check
+;;              languagetool-clear-suggestions
+;;              languagetool-correct-at-point
+;;              languagetool-correct-buffer
+;;              languagetool-set-language
+;;              languagetool-server-mode
+;;              languagetool-server-start
+;;              languagetool-server-stop))
 
-(setq languagetool-java-arguments '("-Dfile.encoding=UTF-8")
-        languagetool-console-command "~/.languagetool/languagetool-commandline.jar"
-        languagetool-server-command "~/.languagetool/languagetool-server.jar"
-	languagetool-supported-languages '("en-US" "es")
-	languagetool-language "en-US"
-	)
+;; (setq languagetool-java-arguments '("-Dfile.encoding=UTF-8")
+;;         languagetool-console-command "~/.languagetool/languagetool-commandline.jar"
+;;         languagetool-server-command "~/.languagetool/languagetool-server.jar"
+;; 	languagetool-supported-languages '("en-US" "es")
+;; 	languagetool-language "en-US"
+;; 	)
 
 ;; Start the LanguageTool server after Emacs is initialized
-(add-hook 'after-init-hook #'languagetool-server-start)
+;; (add-hook 'after-init-hook #'languagetool-server-start)
 
 ;; Stop the LanguageTool server when Emacs is exited
-(add-hook 'kill-emacs-hook #'languagetool-server-stop)
+;; (add-hook 'kill-emacs-hook #'languagetool-server-stop)
 
 ;; lsp-mode: The lenguage server for c/c++, python, java
 ;; https://github.com/emacs-lsp/lsp-mode
 (use-package lsp-mode
+  :commands (lsp lsp-deferred)
   :hook ((c-mode c++-mode python-mode java-mode) . lsp-deferred)
   :config
   ;; Set the path to clangd for C/C++
   (setq lsp-clients-clangd-executable "clangd")
   ;; Use flycheck instead of flymake
   (setq lsp-prefer-flymake nil))
+
+(with-eval-after-load 'lsp-mode
+  ;; Disable verbose logging of LSP input/output
+  (setq lsp-log-io nil)
+
+  ;; Suppress warning about ambiguous project root
+  (setq lsp-message-project-root-warning t)
+
+  ;; Suppress "Unknown notification" warnings (like semgrep/rulesRefreshed)
+  (setq lsp--log-unknown-message-function #'ignore))
+
 
 ;; lsp-ui: A simple ui for the lenguage server
 ;; https://github.com/emacs-lsp/lsp-ui
@@ -437,6 +528,21 @@
 (use-package button-lock
   :ensure t)
 
+
+;; ellama: To have a chatbut in the editor,
+;; https://github.com/s-kostyaev/ellama
+;; note you will need to install ollama https://ollama.com/download
+(use-package ellama
+  :ensure t
+  :bind ("C-c e" . ellama)
+  ;; send last message in chat buffer with C-c C-c
+  :hook (org-ctrl-c-ctrl-c-final . ellama-chat-send-last-message)
+  :init (setopt ellama-auto-scroll t)
+  :config
+  ;; show ellama context in header line in all buffers
+  (ellama-context-header-line-global-mode +1)
+  ;; show ellama session id in header line in all buffers
+  (ellama-session-header-line-global-mode +1))
 
 ;; -------------------------------------------------------------------------------------------
 ;; My C/C++ Packges and Configs
@@ -574,6 +680,11 @@
   :ensure t
   :after maven-test-mode
   :commands (mvn-clean mvn-compile mvn-install))
+
+;; -------------------------------------------------------------------------------------------
+;; My TypeScript/TSX/JavaScript/JSX Pakcages and Configs
+
+
 
 
 ;; init.el ends here
