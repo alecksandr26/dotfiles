@@ -201,7 +201,6 @@
 ;; Activasting windmove to move between the windows 
 (windmove-default-keybindings) ;; Shift + arrow keys
 
-
 (require 'ansi-color)
 
 (defun my/compilation-mode-colorize ()
@@ -368,7 +367,6 @@
   :ensure t)
 
 (global-set-key [f4] 'consult-ripgrep)
-
 
 
 ;; multiple-cursors
