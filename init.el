@@ -229,9 +229,10 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(company diff-hl iedit magit-todos multi-vterm multiple-cursors
-	     projectile pyvenv rust-mode smex super-save vterm
-	     yasnippet yasnippet-snippets)))
+   '(cmake-mode company diff-hl iedit magit-todos markdown-mode
+		multi-vterm multiple-cursors projectile pyvenv
+		rust-mode smex super-save vterm yasnippet
+		yasnippet-snippets)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -383,7 +384,22 @@
   (super-save-mode 1)
   (setq super-save-auto-save-when-idle t)) ;; Save when idle
 
+;; markdown-mode: To highlight and render markdown
+;; https://jblevins.org/projects/markdown-mode/
+;; sudo pacman -S pandoc
+(use-package markdown-mode
+  :ensure t
+  :mode ("README\\.md\\'" . gfm-mode)
+  :init (setq markdown-command "pandoc --standalone --self-contained")
+  :bind (:map markdown-mode-map
+              ("C-c C-e" . markdown-do)))
 
+
+;; cmake-mode: To highlitg the cmake code
+(use-package cmake-mode
+  :ensure t
+  :mode (("CMakeLists\\.txt\\'" . cmake-mode)
+         ("\\.cmake\\'" . cmake-mode)))
 
 ;; -------------------------------------------------------------------------------------------
 ;; My Python Packges and Configs
@@ -395,7 +411,7 @@
       (compile (format "%s -m pip install %s" python package))))
 
 ;; python: This is a packaged that is an IDE
-(use-package python
+(use-package python  
   :ensure t
   :custom
   (python-shell-interpreter "python3")
