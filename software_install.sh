@@ -78,6 +78,11 @@ sudo pacman -S --noconfirm \
     kdenlive gimp \
     qemu-full
 
+# mypaint fix patches:
+# https://github.com/wobbol/mypaint/commit/3b682d5898f4a6b709a2cd1a4d2b1b9288277cd6
+# https://github.com/mypaint/mypaint/commit/2a92b6baf452aba2cff3cc0a7782b301da3933d7
+# https://github.com/mypaint/mypaint/commit/243d9f450933c08077ce26e9626123cf69d241ba
+
 # 7.1 Configuring graphical stuff
 echo "Configuring graphical stuff..."
 mkdir -p ~/.config/Thunar/
