@@ -44,6 +44,8 @@ echo "Configuring xorg and xfce..."
 cp .xinitrc ~
 cp .Xresources ~
 mkdir -p ~/.config/
+sudo mkdir -p /usr/share/themes/empty/xfwm4/
+sudo touch /usr/share/themes/empty/xfwm4/themerc
 
 # 5. PipeWire audio server and firmware
 echo "Installing PipeWire..."
@@ -51,7 +53,7 @@ sudo pacman -S --noconfirm sof-firmware alsa-firmware pipewire pipewire-alsa pip
 
 # 6. Installing terminal emulator stuff
 echo "Installing terminal emulator stuff..."
-sudo pacman -S --noconfirm kitty tmux nano vim nnn less htop zip unzip xdg-utils
+sudo pacman -S --noconfirm kitty tmux nano vim nnn less htop zip unzip xdg-utils tree adobe-source-code-pro-fonts
 yay -S --noconfirm timg
 
 # Guides for the weird software:
@@ -95,7 +97,6 @@ rustup default stable
 
 # 8.2 Configuring dev tools
 echo "Configuring dev tools..."
-cp .emacs ~/
 mkdir -p ~/.emacs.d/emacs-backup
 mkdir -p ~/.emacs.d/emacs-saves
 mkdir -p ~/.emacs.d/themes
