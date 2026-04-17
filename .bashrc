@@ -13,7 +13,7 @@ __git_branch() {
 }
 
 # Colored prompt (green user@host, blue dir, yellow git branch)
-PS1='\[\e[1;32m\]\u@\h\[\e[0m\] \[\e[1;34m\]\W\[\e[1;33m\]$(__git_branch)\[\e[0m\]\$ '
+PS1='\[\e[1;32m\]\u@\h\[\e[0m\] \[\e[1;34m\]\W\[\e[1;33m\]$(__git_branch)\[\e[0m\] $ '
 
 # Aliases
 alias ls='ls --color=auto'
