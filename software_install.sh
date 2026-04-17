@@ -43,7 +43,6 @@ sudo pacman -S --noconfirm lib32-mesa lib32-vulkan-radeon
 echo "Configuring xorg and xfce..."
 cp .xinitrc ~
 cp .Xresources ~
-sudo cp 20-amdgpu.conf /etc/X11/xorg.conf.d/
 mkdir -p ~/.config/
 
 # 5. PipeWire audio server and firmware
