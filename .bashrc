@@ -5,33 +5,29 @@
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
 
+# Git branch for prompt
+__git_branch() {
+    local branch
+    branch=$(git symbolic-ref --short HEAD 2>/dev/null)
+    [ -n "$branch" ] && echo " ($branch)"
+}
+
+# Colored prompt (green user@host, blue dir, yellow git branch)
+PS1='\[\e[1;32m\]\u@\h\[\e[0m\] \[\e[1;34m\]\W\[\e[1;33m\]$(__git_branch)\[\e[0m\]\$ '
+
+# Aliases
 alias ls='ls --color=auto'
 alias grep='grep --color=auto'
-PS1='[\u@\h \W]\$ '
-export RDM=$(which rdm)
-export PATH=/home/aleck/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl
+alias nnn='nnn -d'
 
-export EDITOR="emacsclient -t"                  # $EDITOR opens in terminal
-export VISUAL="ema"         # $VISUAL opens in GUI mode
-
-# Nodejs
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-
-# Java 
-export PATH=/opt/jdk-17.0.11+9/bin:$PATH
-export PATH=/opt/android-studio/bin:$PATH
-
-# Android
-export ANDROID_HOME=$HOME/Android/Sdk
-export PATH=$PATH:$ANDROID_HOME/emulator
-export PATH=$PATH:$ANDORID_HOME/platform-tools
+# Editor
+export EDITOR="emacsclient -t"
+export VISUAL="ema"
 
 # Debuginfo
 export DEBUGINFOD_URLS="https://debuginfod.archlinux.org"
 
-
-# nnn
-alias nnn='nnn -d'
-
+# pyenv
+if command -v pyenv &> /dev/null; then
+    eval "$(pyenv init - bash)"
+fi

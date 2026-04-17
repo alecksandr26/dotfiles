@@ -1,20 +1,29 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
 # To connect ssh: ssh -o UserKnownHostsFile=/dev/null root@192.168.100.66
-# The whole script is base on the Installation Guide
+# The whole script is based on the Installation Guide
 # https://wiki.archlinux.org/title/Installation_guide
+
+LOG_FILE="/tmp/arch_install.log"
+exec > >(tee -a "$LOG_FILE") 2>&1
+echo "Logging to $LOG_FILE"
+
+# Helper: get partition path (handles NVMe /dev/nvme0n1p1 vs /dev/sda1)
+part() {
+    local disk=$1 num=$2
+    if [[ "$disk" == *nvme* ]] || [[ "$disk" == *mmcblk* ]]; then
+        echo "${disk}p${num}"
+    else
+        echo "${disk}${num}"
+    fi
+}
 
 # Function to check internet connection
 check_internet() {
     echo "Checking internet connection..."
-    sleep 2
     ping -c 1 archlinux.org &> /dev/null
-    if [ $? -ne 0 ]; then
-        echo "No internet connection detected. Please check your connection and try again."
-        exit 1
-    else
-        echo "Internet connection is active."
-    fi
+    echo "Internet connection is active."
 }
 
 partition_disk() {
@@ -31,7 +40,6 @@ partition_disk() {
     echo "+$efi_size" # Last sector
     echo t # Change partition type
     echo 1 # Select partition 1
-    # echo 1 # Type EFI System
 
     echo n # Add a new partition
     echo 2 # Partition number
@@ -50,69 +58,34 @@ partition_disk() {
     echo 20 # Type Linux filesystem
 
     echo w # Write changes
-    ) | fdisk $disk
+    ) | fdisk "$disk"
 
-    # Check if fdisk commands executed successfully
-    if [ $? -ne 0 ]; then
-	echo "Partitioning failed. Please check the fdisk commands and try again."
-	exit 1
-    else
-	echo "Disk partitioning completed successfully."
-    fi
+    echo "Disk partitioning completed successfully."
 }
 
 formatting() {
     local disk=$1
-    mkfs.fat -F32 ${disk}1
-    if [ $? -ne 0 ]; then
-	echo "Formating /dev/sda1 failed."
-	exit 1
-    else
-	echo "Formating /dev/sda1 success."
-    fi
-    
-    mkswap ${disk}2
-    if [ $? -ne 0 ]; then
-	echo "Making swapon /dev/sda2 failed."
-	exit 1
-    else
-	echo "Making swapon /dev/sda2 success."
-    fi
-    
-    
-    (echo y) | mkfs.ext4 ${disk}3
-    if [ $? -ne 0 ]; then
-	echo "Formating /dev/sda3 failed."
-	exit 1
-    else
-	echo "Formating /dev/sda3 success."
-    fi
+    echo "Formatting $(part "$disk" 1) as FAT32 (EFI)..."
+    mkfs.fat -F32 "$(part "$disk" 1)"
+
+    echo "Creating swap on $(part "$disk" 2)..."
+    mkswap "$(part "$disk" 2)"
+
+    echo "Formatting $(part "$disk" 3) as ext4..."
+    mkfs.ext4 -F "$(part "$disk" 3)"
 }
 
 mounting() {
     local disk=$1
-    mount ${disk}3 /mnt
-    if [ $? -ne 0 ]; then
-	echo "Mounting /dev/sda3 to /mnt failed."
-	exit 1
-    else
-	echo "Mounting /dev/sda3 to /mnt success."
-    fi
-    mkdir /mnt/boot
-    mount ${disk}1 /mnt/boot
-    if [ $? -ne 0 ]; then
-	echo "Mounting /dev/sda1 to /mnt/boot failed."
-	exit 1
-    else
-	echo "Mounting /dev/sda1 to /mnt/boot success."
-    fi
-    swapon ${disk}2
-    if [ $? -ne 0 ]; then
-	echo "Swaponing /dev/sda2 failed."
-	exit 1
-    else
-	echo "Swaponing /dev/sda2 success."
-    fi
+    echo "Mounting $(part "$disk" 3) to /mnt..."
+    mount "$(part "$disk" 3)" /mnt
+
+    echo "Mounting $(part "$disk" 1) to /mnt/boot..."
+    mkdir -p /mnt/boot
+    mount "$(part "$disk" 1)" /mnt/boot
+
+    echo "Enabling swap on $(part "$disk" 2)..."
+    swapon "$(part "$disk" 2)"
 }
 
 # 1. Check Internet Connection
@@ -120,240 +93,161 @@ check_internet
 
 # 2. Updating the system clock
 echo "Updating the system clock..."
-sleep 2
 timedatectl set-ntp true
-
-echo "Checking the clock service..."
-sleep 2
 timedatectl status
 
-# 2. Partition the Disk
+# 3. Partition the Disk
+# NOTE: Partition scheme is EFI + swap + root (no separate /home)
 echo "Checking the disks..."
-sleep 2
 fdisk -l
-read -p "Enter the disk device (e.g., /dev/sda): " disk_device
-partition_disk $disk_device
+disk_device=""
+while [ -z "$disk_device" ]; do
+    read -p "Enter the disk device (e.g., /dev/sda or /dev/nvme0n1): " disk_device
+    if [ -z "$disk_device" ]; then
+        echo "Disk device cannot be empty. Please try again."
+    elif [ ! -b "$disk_device" ]; then
+        echo "'$disk_device' is not a valid block device. Please try again."
+        disk_device=""
+    fi
+done
+partition_disk "$disk_device"
 
-
-# 3. Format and Mount Partitions
+# 4. Format and Mount Partitions
 echo "Formatting and mounting partitions..."
-sleep 2
-formatting $disk_device
-sleep 2
-mounting $disk_device
+formatting "$disk_device"
+mounting "$disk_device"
 
-# 4. Install Base System
+# 5. Install Base System
 echo "Installing base system..."
-sleep 2
-pacstrap /mnt base linux linux-firmware
-if [ $? -ne 0 ]; then
-    echo "Base system installation failed."
-    exit 1
-else
-    echo "Base system installation success."
-fi
+pacstrap /mnt base linux linux-firmware linux-firmware-amdgpu
 
-
-# 5. Generate fstab
+# 6. Generate fstab
 echo "Generating fstab..."
-sleep 2
 genfstab -U /mnt >> /mnt/etc/fstab
-if [ $? -ne 0 ]; then
-    echo "Generating fstab failed."
-    exit 1
-else
-    echo "Generating fstab success."
-fi
 
-# 6. Chroot into the New System
+# 7. Chroot into the New System
 echo "Chrooting into the new system and configure it..."
-sleep 2
-
 
 read -r -p "Put the hostname: " hostname
 while true; do
-    # Prompt user to enter root password
     read -s -r -p "Put the root's passwd: " root_passwd
     echo ""
-
-    # Prompt user to re-enter root password
     read -s -r -p "Re-enter the root's passwd: " root_passwd_confirm
     echo ""
-
-    # Check if passwords match
     if [ "$root_passwd" != "$root_passwd_confirm" ]; then
         echo "Passwords do not match. Please try again."
     else
         echo "Passwords match."
-        break  # Exit the loop if passwords match
+        break
     fi
 done
 read -r -p "Put an username: " username
 while true; do
-    # Prompt user to enter user's password
     read -s -r -p "Put user's passwd: " user_passwd
     echo ""
-
-    # Prompt user to re-enter user's password
     read -s -r -p "Re-enter user's passwd: " user_passwd_confirm
     echo ""
-
-    # Check if passwords match
     if [ "$user_passwd" != "$user_passwd_confirm" ]; then
         echo "Passwords do not match. Please try again."
     else
         echo "Passwords match."
-        break  # Exit the loop if passwords match
+        break
     fi
 done
 
-# Export variables to be available in arch-chroot
-# The issue you're encountering stems from how variables are expanded within a here document (<<EOF). Specifically, variables inside a here document are subject to expansion at the time the here document is parsed, not when it's executed. This can lead to unexpected behavior, especially with special characters like # and $.
+echo "Available timezones (examples: America/Chicago, Europe/London, Mexico/General):"
+ls /usr/share/zoneinfo/ | head -20
+echo "..."
+read -r -p "Enter your timezone (e.g., Mexico/General): " timezone
+while [ ! -f "/usr/share/zoneinfo/$timezone" ]; do
+    echo "'$timezone' is not a valid timezone."
+    read -r -p "Enter your timezone (e.g., Mexico/General): " timezone
+done
 
-# Problem Explanation
-# When you use a here document (<<EOF) in Bash, variables inside the here document are expanded before the script inside the here document is executed. This means any special characters or variable syntax ($) inside the variable PASSWD will be interpreted prematurely, potentially causing syntax errors or unexpected behavior.
-
-# Solution: Quoting and Here Document
-# To solve this problem, you need to ensure that variables inside the here document are quoted properly to delay their expansion until runtime, when they are actually used within the here document script.
-
-# Here’s how you can modify your script to handle special characters correctly:
 export DISK_DEVICE=$disk_device
 export HOSTNAME=$hostname
 export USERNAME=$username
 export ROOT_PASSWD=$root_passwd
 export USER_PASSWD=$user_passwd
-
-sleep 1
+export TIMEZONE=$timezone
 
 arch-chroot /mnt /bin/bash <<EOF
-#!/usr/bin/env bash
+set -euo pipefail
 
-configure_system() {
-    echo "Setting timezone..."
-    sleep 2
-    ln -sf /usr/share/zoneinfo/Mexico/General /etc/localtime
-    hwclock --systohc
+# 8. Configure the System
+echo "Setting timezone to \$TIMEZONE..."
+ln -sf /usr/share/zoneinfo/\$TIMEZONE /etc/localtime
+hwclock --systohc
 
-    echo "Configuring locale..."
-    sleep 2
-    echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
-    echo "es_MX.UTF-8 UTF-8" >> /etc/locale.gen
-    locale-gen
-    echo "LANG=en_US.UTF-8" > /etc/locale.conf
+echo "Configuring locale..."
+grep -qxF "en_US.UTF-8 UTF-8" /etc/locale.gen || echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
+grep -qxF "es_MX.UTF-8 UTF-8" /etc/locale.gen || echo "es_MX.UTF-8 UTF-8" >> /etc/locale.gen
+locale-gen
+echo "LANG=en_US.UTF-8" > /etc/locale.conf
 
-    echo "Configuring vconsole..."
-    sleep 2
-    echo "KEYMAP=us" > /etc/vconsole.conf
+echo "Configuring vconsole..."
+echo "KEYMAP=us" > /etc/vconsole.conf
 
-    echo "Setting hostname..."
-    sleep 2
-    echo "\$HOSTNAME" > /etc/hostname
-    echo -e "127.0.0.1 \t localhost \n ::1 \t \t localhost \n 127.0.1.1 \t "\$HOSTNAME".localdomain \t "\$HOSTNAME"" >> /etc/hosts 
-}
+echo "Setting hostname..."
+echo "\$HOSTNAME" > /etc/hostname
+cat > /etc/hosts <<HOSTS
+127.0.0.1	localhost
+::1		localhost
+127.0.1.1	\$HOSTNAME.localdomain	\$HOSTNAME
+HOSTS
 
+# 9. Configure Network
+echo "Enabling network service..."
+pacman -S --noconfirm networkmanager dhcpcd
+systemctl enable NetworkManager
+systemctl enable dhcpcd
 
-configure_network() {
-    echo "Enabling network service..."
-    sleep 2
-    (echo y) | pacman -S networkmanager dhcpcd
-    systemctl enable NetworkManager
-    systemctl enable dhcpcd
-}
+# 10. Install GRUB Boot Loader and Configure it
+echo "Downloading GRUB boot loader..."
+pacman -S --noconfirm grub efibootmgr
+echo "Installing GRUB boot loader..."
+grub-install --target=x86_64-efi --efi-directory=/boot/ --bootloader-id=GRUB
+echo "Configuring GRUB..."
+grub-mkconfig -o /boot/grub/grub.cfg
 
-installing_grub() {
-    echo "Downloading GRUB boot loader..."
-    sleep 2
-    (echo y) | pacman -S grub efibootmgr
-    echo "Installing GRUB boot loader..."
-    sleep 2
-    grub-install --target=x86_64-efi --efi-directory=/boot/ --bootloader-id=GRUB
-    echo "Configuring GRUB..."
-    sleep 1
-    grub-mkconfig -o /boot/grub/grub.cfg
-}
+# 10.1 Add resume hook for hibernation and regenerate initramfs
+echo "Adding resume hook to mkinitcpio..."
+sed -i 's/^HOOKS=(\(.*\)filesystems\(.*\))/HOOKS=(\1filesystems resume\2)/' /etc/mkinitcpio.conf
+mkinitcpio -P
 
-configure_new_user() {
-    echo "Setting root password..."
-    sleep 2
-    (echo root:"\$ROOT_PASSWD") | chpasswd
+# 11. Set Root Password and Create User
+echo "Setting root password..."
+chpasswd <<< "root:\$ROOT_PASSWD"
 
-    echo "Creating user "\$USERNAME"..."
-    sleep 2
-    useradd -m -G wheel,sys,rfkill,input  "\$USERNAME"
-    echo "Creating basic folders to "\$USERNAME""
-    sleep 2
-    mkdir /home/"\$USERNAME"/Downloads
-    mkdir /home/"\$USERNAME"/Documents
-    mkdir /home/"\$USERNAME"/Pictures
-    mkdir /home/"\$USERNAME"/Videos
-    mkdir /home/"\$USERNAME"/Music
-    chown -R "\$USERNAME" /home/"\$USERNAME"/
-    
-    echo "Setting the password for user "\$USERNAME"..."
-    sleep 2
-    (echo "\$USERNAME":"\$USER_PASSWD") | chpasswd
-}
+echo "Creating user \$USERNAME..."
+useradd -m -G wheel,sys,rfkill,input "\$USERNAME"
 
+echo "Setting up XDG user directories..."
+pacman -S --noconfirm xdg-user-dirs
+su - "\$USERNAME" -c "xdg-user-dirs-update"
 
-configure_sudo() {
-    echo "Setting sudo..."
-    sleep 2
-    echo "Installing sudo..."
-    (echo y) | pacman -S sudo
-    echo "Configuring sudo..."
-    sleep 2
-    sed -i 's/# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/' /etc/sudoers
-}
+echo "Setting the password for user \$USERNAME..."
+chpasswd <<< "\$USERNAME:\$USER_PASSWD"
 
-# 7. Configure the System
-configure_system
-
-
-# 8. Configure Network
-configure_network
-
-# 9. Install GRUB Boot Loader and Configure it
-installing_grub
-
-
-# 10. Set Root Password and Create User
-configure_new_user
-
-
-# 11. Set sudo
-configure_sudo
-
+# 12. Set sudo
+echo "Installing and configuring sudo..."
+pacman -S --noconfirm sudo
+sed -i 's/# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/' /etc/sudoers
 
 EOF
 
-if [ $? -ne 0 ]; then
-    echo "Chrooting failed."
-    exit 1
-else
-    echo "Chrooting configuration was success."
-fi
+echo "Chroot configuration completed successfully."
 
-
-# 12. Exit archiso and Reboot
-echo "Exiting chroot, umounting and rebooting..."
-sleep 2
-echo "Umounting recursive /mnt/..."
-sleep 1
+# 13. Exit archiso and Reboot
+echo "Exiting chroot, unmounting and rebooting..."
+echo "Unmounting recursive /mnt/..."
 umount -R /mnt
-if [ $? -ne 0 ]; then
-    echo "Umounting /mnt/ failed."
-    exit 1
-else
-    echo "Umounting /mnt/ success."
-fi
 
-echo "swappingoff /dev/sda2"
-sleep 1
-swapoff /dev/sda2
+echo "Swapoff $(part "$disk_device" 2)"
+swapoff "$(part "$disk_device" 2)"
 
 read -n1 -r -p "Press any key to reboot the system..." key
+echo ""
 echo "Rebooting..."
 sleep 2
 reboot
-
-
