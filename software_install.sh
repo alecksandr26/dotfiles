@@ -27,7 +27,7 @@ cd dotfiles/
 
 # 3. Installing xorg and xfce
 echo "Installing xorg and xfce..."
-sudo pacman -S --noconfirm xorg xorg-xinit xfce4 xfce4-goodies
+sudo pacman -S --noconfirm xorg xorg-xinit xfce4 xfce4-goodies xf86-video-amdgpu
 
 # 3.1. Installing drivers (RX 5500 XT / Navi 14)
 echo "Installing drivers..."
