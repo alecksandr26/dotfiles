@@ -28,10 +28,12 @@ cd dotfiles/
 # 3. Installing xorg and xfce
 echo "Installing xorg and xfce..."
 sudo pacman -S --noconfirm xorg xorg-xinit xfce4 xfce4-goodies xf86-video-amdgpu
+sudo cp ~/Documents/dotfiles/20-amdgpu.conf /etc/X11/xorg.conf.d/
 
 # 3.1. Installing drivers (RX 5500 XT / Navi 14)
 echo "Installing drivers..."
 sudo pacman -S --noconfirm mesa vulkan-radeon libva-utils
+
 
 # 3.2 Enabling the multilib
 echo "Enabling the multilib..."
@@ -40,51 +42,17 @@ sudo pacman -Sy
 sudo pacman -S --noconfirm lib32-mesa lib32-vulkan-radeon
 
 
+
 # 3.3 Installing and enabling a Display Manager (to avoid TTY)
 echo "Installing LightDM..."
-sudo pacman -S --noconfirm lightdm lightdm-gtk-greeter
+sudo pacman -S --noconfirm lightdm lightdm-gtk-greeter arandr
 sudo systemctl enable lightdm
 
-
-# 3.4 Auto-configure LightDM Monitor
-echo "Configuring LightDM monitor detection..."
-
-# Detect connected monitors using the kernel (works in TTY)
-echo "Detecting connected monitors via kernel..."
-CONNECTED_MONITORS=$(ls /sys/class/drm/card0-* | grep -e "status" | xargs grep -l "^connected" | awk -F'/' '{print $5}' | sed 's/card0-//;s/-//' | tr '[:lower:]' '[:upper:]')
-# Note: The above logic cleans up names like 'card0-DP-2' to 'DP2'. 
-# However, xrandr usually needs the hyphenated name like 'DisplayPort-2'.
-
-echo "------------------------------------------------------------"
-echo "NOTE: Use 'DisplayPort-2' if your setup hasn't changed."
-echo "------------------------------------------------------------"
-
-read -r -p "Enter your primary monitor name [Default: DisplayPort-2]: " PRIMARY_MONITOR
-PRIMARY_MONITOR=${PRIMARY_MONITOR:-DisplayPort-2}
-sudo tee /etc/lightdm/display-setup.sh > /dev/null <<EOF
-#!/bin/sh
-sleep 2
-PRIMARY=$PRIMARY_MONITOR
-xrandr --output \$PRIMARY --primary
-EOF
-sudo chmod +x /etc/lightdm/display-setup.sh
-
-# Update lightdm.conf to use the script under the [Seat:*] section
-# We ensure the script is enabled even if the line was missing
-if grep -q "^\[Seat:\*\]" /etc/lightdm/lightdm.conf; then
-    sudo sed -i '/^\[Seat:\*\]/a display-setup-script=/etc/lightdm/display-setup.sh' /etc/lightdm/lightdm.conf
-else
-    echo -e "\n[Seat:*]\ndisplay-setup-script=/etc/lightdm/display-setup.sh" | sudo tee -a /etc/lightdm/lightdm.conf
-fi
-
-# 3.4.1 Early KMS for AMD (Fixes LightDM black screens)
-echo "Enabling Early KMS for amdgpu..."
-sudo sed -i 's/^MODULES=(/MODULES=(amdgpu /' /etc/mkinitcpio.conf
-sudo mkinitcpio -P
+echo "Remember running arandr and creating the display `display-setup.sh` and adding this `xrdb -merge /home/aleck/.Xresources` "
 
 # 4. Configure xorg and xfce
 echo "Configuring xorg and xfce..."
-cp .xinitrc ~
+cp .xinitrc ~ # for starting with xstart
 cp .Xresources ~
 mkdir -p ~/.config/
 sudo mkdir -p /usr/share/themes/empty/xfwm4/
