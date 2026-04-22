@@ -28,7 +28,7 @@ cd dotfiles/
 # 3. Installing xorg and xfce
 echo "Installing xorg and xfce..."
 sudo pacman -S --noconfirm xorg xorg-xinit xfce4 xfce4-goodies xf86-video-amdgpu
-sudo cp ~/Documents/dotfiles/20-amdgpu.conf /etc/X11/xorg.conf.d/
+
 
 # 3.1. Installing drivers (RX 5500 XT / Navi 14)
 echo "Installing drivers..."
@@ -48,7 +48,7 @@ echo "Installing LightDM..."
 sudo pacman -S --noconfirm lightdm lightdm-gtk-greeter arandr
 sudo systemctl enable lightdm
 
-echo "Remember running arandr and creating the display `display-setup.sh` and adding this `xrdb -merge /home/aleck/.Xresources` "
+echo "Remember running `arandr` and creating the display `display-setup.sh` and adding this `xrdb -merge /home/aleck/.Xresources` "
 
 # 4. Configure xorg and xfce
 echo "Configuring xorg and xfce..."
@@ -57,6 +57,9 @@ cp .Xresources ~
 mkdir -p ~/.config/
 sudo mkdir -p /usr/share/themes/empty/xfwm4/
 sudo touch /usr/share/themes/empty/xfwm4/themerc
+
+# Setting up the config for tear free
+sudo cp ~/Documents/dotfiles/20-amdgpu.conf /etc/X11/xorg.conf.d/
 
 # 5. PipeWire audio server and firmware
 echo "Installing PipeWire..."
