@@ -39,6 +39,15 @@ sudo sed -i "/\[multilib\]/,/Include/"'s/^#//' /etc/pacman.conf
 sudo pacman -Sy
 sudo pacman -S --noconfirm lib32-mesa lib32-vulkan-radeon
 
+
+# 3.3 Installing and enabling a Display Manager (to avoid TTY)
+echo "Installing LightDM..."
+sudo pacman -S --noconfirm lightdm lightdm-gtk-greeter
+sudo systemctl enable lightdm
+
+# 3.4 Installing extra tools for xfce
+sudo pacman -S --noconfirm file-roller
+
 # 4. Configure xorg and xfce
 echo "Configuring xorg and xfce..."
 cp .xinitrc ~
@@ -59,6 +68,44 @@ yay -S --noconfirm timg
 # Guides for the weird software:
 # nnn: https://opensource.com/article/22/12/linux-file-manager-nnn
 # nnn: Usage https://github.com/jarun/nnn/wiki/Usage#keyboard-mouse
+# NAVIGATION
+#         Up k  Up                PgUp ^U  Page up
+#         Dn j  Down              PgDn ^D  Page down
+#         Lt h  Parent            ~ ` @ -  ~, /, start, prev
+#     Ret Rt l  Open                    '  First file/match
+#         g ^A  Top                     J  Jump to entry/offset
+#         G ^E  End                    ^J  Toggle auto-advance on open
+#        B (,)  Book(mark)           b ^/  Select bookmark
+#          1-4  Context           (Sh)Tab  Cycle/new context
+#      2Esc ^Q  Quit                   ^y  Next young
+#           ^G  QuitCD                  Q  Pick/err, quit
+#    q Alt+Esc  Quit context           ^L  Refresh dir
+
+# FILTER & PROMPT
+#            /  Filter                 ^N  Toggle type-to-nav
+#          Esc  Exit prompt            ^L  Toggle last filter
+#            .  Toggle hidden
+
+# FILES
+#         o ^O  Open with...            n  Create new/link
+#         f ^F  File details            d  Detail mode toggle
+#           ^R  Rename/dup              r  Batch rename
+#            z  Archive                 e  Edit file
+#            *  Toggle exe              >  Export list
+#      Space +  (Un)select            m-m  Select range/clear
+#            a  Select all              A  Invert sel
+#         p ^P  Copy here            w ^W  Cp/mv sel as
+#         v ^V  Move here               E  Edit sel list
+#         x ^X  Delete or trash         S  Listed sel size
+#            X  Delete (rm -rf)       Esc  Send to FIFO
+
+# MISC
+#        Alt ;  Select plugin           =  Launch app
+#         ! ^]  Shell                   ]  Cmd prompt
+#            c  Connect remote          u  Unmount remote/archive
+#         t ^T  Sort toggles            s  Manage session
+#            T  Set time type           0  Lock
+#           ^L  Redraw                  ?  Help, conf
 
 # 6.1 Configure the terminal emulator stuff
 echo "Configuring terminal emulator stuff..."
