@@ -45,8 +45,42 @@ echo "Installing LightDM..."
 sudo pacman -S --noconfirm lightdm lightdm-gtk-greeter
 sudo systemctl enable lightdm
 
-# 3.4 Installing extra tools for xfce
-sudo pacman -S --noconfirm file-roller
+
+# 3.4 Auto-configure LightDM Monitor
+echo "Configuring LightDM monitor detection..."
+
+# Detect connected monitors using the kernel (works in TTY)
+echo "Detecting connected monitors via kernel..."
+CONNECTED_MONITORS=$(ls /sys/class/drm/card0-* | grep -e "status" | xargs grep -l "^connected" | awk -F'/' '{print $5}' | sed 's/card0-//;s/-//' | tr '[:lower:]' '[:upper:]')
+# Note: The above logic cleans up names like 'card0-DP-2' to 'DP2'. 
+# However, xrandr usually needs the hyphenated name like 'DisplayPort-2'.
+
+echo "------------------------------------------------------------"
+echo "NOTE: Use 'DisplayPort-2' if your setup hasn't changed."
+echo "------------------------------------------------------------"
+
+read -r -p "Enter your primary monitor name [Default: DisplayPort-2]: " PRIMARY_MONITOR
+PRIMARY_MONITOR=${PRIMARY_MONITOR:-DisplayPort-2}
+sudo tee /etc/lightdm/display-setup.sh > /dev/null <<EOF
+#!/bin/sh
+sleep 2
+PRIMARY=$PRIMARY_MONITOR
+xrandr --output \$PRIMARY --primary
+EOF
+sudo chmod +x /etc/lightdm/display-setup.sh
+
+# Update lightdm.conf to use the script under the [Seat:*] section
+# We ensure the script is enabled even if the line was missing
+if grep -q "^\[Seat:\*\]" /etc/lightdm/lightdm.conf; then
+    sudo sed -i '/^\[Seat:\*\]/a display-setup-script=/etc/lightdm/display-setup.sh' /etc/lightdm/lightdm.conf
+else
+    echo -e "\n[Seat:*]\ndisplay-setup-script=/etc/lightdm/display-setup.sh" | sudo tee -a /etc/lightdm/lightdm.conf
+fi
+
+# 3.4.1 Early KMS for AMD (Fixes LightDM black screens)
+echo "Enabling Early KMS for amdgpu..."
+sudo sed -i 's/^MODULES=(/MODULES=(amdgpu /' /etc/mkinitcpio.conf
+sudo mkinitcpio -P
 
 # 4. Configure xorg and xfce
 echo "Configuring xorg and xfce..."
@@ -60,10 +94,47 @@ sudo touch /usr/share/themes/empty/xfwm4/themerc
 echo "Installing PipeWire..."
 sudo pacman -S --noconfirm sof-firmware alsa-firmware pipewire pipewire-alsa pipewire-pulse wireplumber
 
+# 5.1 Bluetooth audio and things
+echo "Installing Blueman for bluetooth..."
+sudo pacman -S --noconfirm bluez bluez-utils blueman
+sudo systemctl enable bluetooth.service
+
 # 6. Installing terminal emulator stuff
 echo "Installing terminal emulator stuff..."
-sudo pacman -S --noconfirm kitty tmux nano vim nnn less htop zip unzip xdg-utils tree adobe-source-code-pro-fonts
-yay -S --noconfirm timg
+sudo pacman -S --noconfirm kitty tmux nano vim nnn less htop zip unzip xdg-utils tree adobe-source-code-pro-fonts 
+yay -S --noconfirm timg moc-pulse
+
+# Usage for MOC
+# Launch the player
+# mocp
+
+# Basic Controls (Inside UI):
+# ENTER      : Play track / Enter directory
+# TAB        : Switch between file browser (left) and playlist (right)
+# a          : Add track/folder to playlist
+# s          : Stop
+# n / b      : Next / Previous track
+# < / >      : Volume down / up
+# q          : Detach (Close UI, music keeps playing)
+# Q          : Quit (Kills the server and the music)
+
+# # CLI Flags:
+# mocp -i    : Show current song info
+# mocp -x    : Kill the background server
+
+
+# Usage for timg
+# View a single image or GIF
+# timg image.png
+
+# View a video file in the terminal
+# timg video.mp4
+
+# Display images in a grid
+# timg --grid 3x2 /path/to/folder/
+
+# Check terminal capability (Sixel/Kitty support)
+# timg --info
 
 # Guides for the weird software:
 # nnn: https://opensource.com/article/22/12/linux-file-manager-nnn
@@ -119,11 +190,13 @@ cp .tmux.conf ~/
 # 7. Installing basic graphics tools and utilities
 echo "Installing graphics tools, utilities, recording, editing, and virtualization software..."
 sudo pacman -S --noconfirm \
-    chromium thunar gvfs tumbler ffmpegthumbnailer pavucontrol libdvdcss vlc feh mypaint \
+    chromium thunar file-roller gvfs tumbler ffmpegthumbnailer pavucontrol libdvdcss vlc feh mypaint yt-dlp \
     xclip maim \
     obs-studio audacity \
     kdenlive gimp \
     qemu-full
+
+
 
 # mypaint fix patches:
 # https://github.com/wobbol/mypaint/commit/3b682d5898f4a6b709a2cd1a4d2b1b9288277cd6
@@ -134,6 +207,9 @@ sudo pacman -S --noconfirm \
 echo "Configuring graphical stuff..."
 mkdir -p ~/.config/Thunar/
 cp uca.xml ~/.config/Thunar/
+
+# 7.2 Configuring youtube downloader for mp3
+echo -e "\n# --- Media & Download Tools ---\n# Download best quality MP3 with metadata and thumbnail\nalias ytdl-mp3='yt-dlp -x --audio-format mp3 --audio-quality 0 --embed-thumbnail --add-metadata'" >> ~/.bashrc
 
 # 8. Installing dev tools
 echo "Installing dev tools..."
