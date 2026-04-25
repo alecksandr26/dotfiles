@@ -161,11 +161,15 @@ cp .tmux.conf ~/
 # 7. Installing basic graphics tools and utilities
 echo "Installing graphics tools, utilities, recording, editing, and virtualization software..."
 sudo pacman -S --noconfirm \
-    chromium thunar file-roller gvfs tumbler ffmpegthumbnailer pavucontrol libdvdcss vlc feh mypaint yt-dlp \
+    firefox thunar file-roller gvfs tumbler ffmpegthumbnailer pavucontrol libdvdcss vlc feh mypaint yt-dlp \
     xclip maim \
     obs-studio audacity \
     kdenlive gimp \
     qemu-full
+
+
+# firefox: tree view tabs config:
+# https://superuser.com/questions/1424478/can-i-hide-native-tabs-at-the-top-of-firefox
 
 
 
@@ -244,11 +248,16 @@ echo "Configuring the hp printer drivers (cups)..."
 sudo systemctl enable cups
 sudo systemctl start cups
 
-# 12. Installing network software
+
+# 12. Installing office software
+echo "Installing office software..."
+sudo pacman -S --noconfirm libreoffice-still
+
+# 13. Installing network software
 echo "Installing network software (openvpn)..."
 yay -S --noconfirm openvpn
 
-# 13. Rebooting
+# 14. Rebooting
 read -n1 -r -p "Press any key to reboot the system..." key
 echo ""
 echo "Removing install script..."

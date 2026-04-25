@@ -1,0 +1,37 @@
+#tabbrowser-tabs {
+  visibility: collapse !important; /* Ya lo tienes, pero refuerza */
+}
+
+/* Oculta completamente TabsToolbar (new tab button, overflow) */
+#TabsToolbar {
+  display: none !important;
+}
+
+/* Quita padding/margins extra en toolbox para más espacio */
+#navigator-toolbox {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+}
+
+/* Oculta menú bar si no lo usas (Ctrl+Shift+A para extensions) */
+#toolbar-menubar {
+  display: none !important;
+}
+
+/* Compacta URL bar al máximo */
+#urlbar {
+  margin: 0 !important;
+  padding: 2px 4px !important;
+  border-radius: 8px !important;
+}
+
+/* Oculta indicadores (private browsing, etc.) */
+.private-browsing-indicator,
+.accessibility-indicator {
+  display: none !important;
+}
+
+/* Fullscreen-like content (con tree sidebar) */
+#appcontent {
+  margin: 0 !important;
+}
