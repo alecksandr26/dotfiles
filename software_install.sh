@@ -170,7 +170,7 @@ sudo pacman -S --noconfirm \
 
 # firefox: tree view tabs config:
 # https://superuser.com/questions/1424478/can-i-hide-native-tabs-at-the-top-of-firefox
-
+# and install your userChrome.css in the dot files...
 
 
 # mypaint fix patches:
