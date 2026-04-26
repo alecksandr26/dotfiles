@@ -171,7 +171,7 @@ sudo pacman -S --noconfirm \
     xclip maim \
     obs-studio audacity \
     kdenlive gimp \
-    qemu-full virt-manager libvirt dnsmasq iptables-nft dmidecode
+    qemu-full virt-manager libvirt dnsmasq iptables-nft dmidecode swtpm
 
 
 # 7.1 Enabling  this things
