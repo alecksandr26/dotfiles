@@ -42,7 +42,6 @@ sudo pacman -Sy
 sudo pacman -S --noconfirm lib32-mesa lib32-vulkan-radeon
 
 
-
 # 3.3 Installing and enabling a Display Manager (to avoid TTY)
 echo "Installing LightDM..."
 sudo pacman -S --noconfirm lightdm lightdm-gtk-greeter arandr
@@ -72,7 +71,14 @@ sudo systemctl enable bluetooth.service
 
 # 6. Installing terminal emulator stuff
 echo "Installing terminal emulator stuff..."
-sudo pacman -S --noconfirm kitty tmux nano vim nnn less htop zip unzip xdg-utils tree adobe-source-code-pro-fonts 
+sudo pacman -S --noconfirm \
+     kitty \
+     tmux nano vim \
+     nnn \
+     less \
+     htop \
+     zip unzip xdg-utils tree adobe-source-code-pro-fonts
+
 yay -S --noconfirm timg moc-pulse
 
 # Usage for MOC
@@ -165,7 +171,237 @@ sudo pacman -S --noconfirm \
     xclip maim \
     obs-studio audacity \
     kdenlive gimp \
-    qemu-full
+    qemu-full virt-manager libvirt dnsmasq iptables-nft dmidecode
+
+
+# 7.1 Enabling  this things
+sudo systemctl start libvirtd.service
+sudo systemctl enable libvirtd.service
+
+: <<'END_COMMENT'
+# Basic Guide to Using QEMU/KVM + libvirt + virt‑manager on Arch Linux
+
+This document explains how to manage NAT networks and create virtual machines using QEMU/KVM with `libvirt`, `virsh`, and `virt‑manager` on Arch Linux. It can be used as both **internal documentation** and as a **commented configuration guide**.
+
+---
+
+## 1. List and manage NAT networks
+
+### 1.1 List all virtual networks
+
+Libvirt allows you to create virtual networks (NAT, bridge, isolated, etc.). To list all networks:
+
+```bash
+virsh net-list --all
+```
+
+Example output:
+Name State Autostart
+
+default active yes
+red_nat_lab active no
+
+- `Name`: network name (used in `virsh net-start <name>` and in `virt‑manager`).  
+- `State`: `active` (running) or `inactive`.  
+- `Autostart`: `yes` if the network starts automatically when the host boots.
+
+### 1.2 Inspect network details (IP, DHCP, bridge)
+
+To see the configuration of a network (for example, `default`):
+
+```bash
+virsh net-dumpxml default
+```
+
+Typical fragment of the output:
+
+```xml
+<bridge name='virbr0' stp='on' delay='0'/>
+<ip address='192.168.122.1' netmask='255.255.255.0'>
+  <dhcp>
+    <range start='192.168.122.100' end='192.168.122.200'/>
+  </dhcp>
+</ip>
+```
+
+- `virbr0`: virtual bridge created by libvirt.  
+- `192.168.122.1`: default gateway / NAT gateway of the network.  
+- DHCP range: `192.168.122.100–192.168.122.200` (assigned to VMs automatically).
+
+### 1.3 Start and enable autostart of a NAT network
+
+For the `default` NAT network:
+
+```bash
+virsh net-start default
+virsh net-autostart default
+```
+
+- `net-start`: starts the given virtual network.  
+- `net-autostart`: configures the network to start automatically when the host boots up.
+
+---
+
+## 2. Create a virtual machine with QEMU/KVM
+
+### 2.1 Install required packages on Arch Linux
+
+Make sure the following packages are installed:
+
+```bash
+sudo pacman -S qemu-full libvirt virt-manager dnsmasq iptables-nft
+```
+
+- `qemu-full`: full QEMU emulator with support for all architectures.  
+- `libvirt`: daemon and API that manages VMs, networks, and storage.  
+- `virt-manager`: graphical UI for creating and managing VMs (similar to VirtualBox).  
+- `dnsmasq`: provides DHCP/DNS for NAT networks.  
+- `iptables-nft`: handles NAT firewall rules for the virtual networks.
+
+### 2.2 Enable and start the libvirt service
+
+```bash
+sudo systemctl enable --now libvirtd.service
+```
+
+Verify that the service is running:
+
+```bash
+sudo systemctl status libvirtd.service
+```
+
+You should see `active (running)`.  
+- If your user is not yet in the `libvirt` group, add it:
+
+```bash
+sudo usermod -aG libvirt $USER
+```
+
+Then **log out and log back in** so the group membership takes effect in your session.
+
+---
+
+## 3. Create a virtual machine with virt‑manager (GUI)
+
+1. Open `virt-manager`:
+
+```bash
+virt-manager
+```
+
+2. In the main window:
+   - Click **File → New Virtual Machine**.
+
+3. Choose installation type:
+   - **Local install media (ISO image or CDROM)**  
+     or  
+   - **Import existing disk image**.
+
+4. Select the ISO (for example, `debian-12.iso` or `Windows11.iso`).
+
+5. Assign resources:
+   - **Memory**: for example `2048 MB` (light Linux) or `4096+ MB` for Windows Server/Enterprise.  
+   - **CPUs**: 2–4 vCPUs.  
+   - **Disk**: at least 10–25 GB; for production or heavy workloads, 40–60 GB.
+
+6. Configure the network:
+   - In **Network Selection**, choose:  
+     - `Virtual network 'default' : NAT` (built‑in NAT network),  
+     or  
+     - `Virtual network 'red_nat_lab' : NAT` (if you created a custom NAT network).
+
+7. Confirm and create the VM:
+   - Click **Finish**.  
+   - The VM will boot, and the OS installation wizard will start.
+
+---
+
+## 4. Create a virtual machine with `virt-install` (terminal)
+
+`virt-install` lets you create VMs directly from the terminal. This is useful for scripting, automation, or clear documentation of how each VM is built.
+
+### 4.1 Example: light Linux VM with NAT network
+
+```bash
+virt-install \
+  --name vm-web \
+  --memory 2048 \
+  --vcpus 2 \
+  --disk size=10 \
+  --os-variant debian12 \
+  --network network=default,model=virtio \
+  --cdrom /home/aleck/ISOs/debian-12.iso \
+  --noautoconsole \
+  --graphics spice
+```
+
+- `--name vm-web`: name of the virtual machine.  
+- `--memory 2048`: 2 GB of RAM.  
+- `--vcpus 2`: 2 virtual CPUs.  
+- `--disk size=10`: 10 GB disk (QCOW2 by default).  
+- `--os-variant debian12`: optimizes libvirt settings for Debian 12.  
+- `--network network=default,model=virtio`: connects the VM to the `default` NAT network using a `virtio` network interface (better performance).  
+- `--cdrom ...`: path to the installation ISO.  
+- `--noautoconsole`: does not open the console after VM creation (you can connect later).  
+- `--graphics spice`: uses SPICE for better graphics (recommended for desktop‑style VMs).
+
+### 4.2 Basic management commands for VMs
+
+After the VM is created:
+
+Start the VM
+
+virsh start vm-web
+Shut down the VM gracefully
+
+virsh shutdown vm-web
+Force‑stop the VM (if it is not responding)
+
+virsh destroy vm-web
+List all VMs
+
+virsh list --all
+Connect to the VM console
+
+virsh console vm-web
+
+- `virsh list --all` shows:
+  - `Name`, `State` (running/blocked/shut off), and `PID` for each VM.
+
+---
+
+## 5. Usage recommendations
+
+### 5.1 NAT network and multiple VMs
+
+- A NAT network (`default` or `red_nat_lab`) is a **shared logical network**:
+  - You can attach **as many VMs** as you want.  
+  - All VMs share the same gateway and DHCP range.  
+  - They can access the Internet and talk to each other over the internal network.
+
+### 5.2 Minimum recommended resources per VM type
+
+| VM type                    | Minimum RAM | Minimum disk | Notes |
+|----------------------------|-----------:|-------------:|-------|
+| Light Linux (Debian/Ubuntu)| 1024–2048 MB | 10–20 GB   | Good for tests, small web servers, etc. |
+| Windows 10/11 Enterprise   | 4096 MB        | 30–40 GB   | Requires more RAM/CPU for good desktop experience. |
+| Windows Server 2022/2025   | 4096–8192 MB | 30–50 GB   | 6–8 GB RAM recommended for AD, IIS, etc. |
+
+---
+
+## 6. Quick setup checklist
+
+- [ ] `libvirtd.service` is enabled and running.  
+- [ ] Current user is in the `libvirt` group and session has been reloaded (log out / in or `newgrp libvirt`).  
+- [ ] The NAT network `default` is started and set to `autostart`.  
+- [ ] Essential packages installed: `qemu-full`, `libvirt`, `virt-manager`, `dnsmasq`, `iptables-nft`.  
+- [ ] Installation ISOs are downloaded and the paths in `--cdrom` or `virt-manager` are correct.
+
+---
+
+This document is designed to serve as a **reference guide** for anyone working with your virtualization setup or maintaining your QEMU/KVM environment in the future.  
+You can save it as `HOWTO-virtualization.md` and update VM names, ISO paths, or resource values to match your actual production/test environment.
+END_COMMENT
 
 
 # firefox: tree view tabs config:
@@ -252,6 +488,10 @@ sudo systemctl start cups
 # 12. Installing office software
 echo "Installing office software..."
 sudo pacman -S --noconfirm libreoffice-still
+
+# 12.1 Install ms fonts
+yay -S ttf-ms-fonts google-fonts-git apple-fonts
+
 
 # 13. Installing network software
 echo "Installing network software (openvpn)..."
