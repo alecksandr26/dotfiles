@@ -428,7 +428,8 @@ sudo pacman -S --noconfirm \
     clang texlive-basic texlive-latex texlive-latexrecommended texlive-latexextra \
     rustup crystal clisp sbcl nasm mingw-w64-gcc wine \
     emacs gdb global valgrind radare2 man-pages \
-    pyenv openssh
+    pyenv openssh \
+    calc
 
 # 8.1 Setting up rustup
 echo "Setting up rustup (stable toolchain)..."
