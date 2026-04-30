@@ -488,7 +488,7 @@ sudo systemctl start cups
 
 # 12. Installing office software
 echo "Installing office software..."
-sudo pacman -S --noconfirm libreoffice-still
+sudo pacman -S --noconfirm libreoffice-still libreoffice-extension-texmaths
 
 # 12.1 Install ms fonts
 yay -S ttf-ms-fonts google-fonts-git apple-fonts
