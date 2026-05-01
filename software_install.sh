@@ -66,7 +66,7 @@ sudo pacman -S --noconfirm sof-firmware alsa-firmware pipewire pipewire-alsa pip
 
 # 5.1 Bluetooth audio and things
 echo "Installing Blueman for bluetooth..."
-sudo pacman -S --noconfirm bluez bluez-utils blueman
+sudo pacman -S --noconfirm bluez bluez-utils blueman audacious
 sudo systemctl enable bluetooth.service
 
 # 6. Installing terminal emulator stuff
@@ -79,25 +79,7 @@ sudo pacman -S --noconfirm \
      htop \
      zip unzip xdg-utils tree adobe-source-code-pro-fonts
 
-yay -S --noconfirm timg moc-pulse
-
-# Usage for MOC
-# Launch the player
-# mocp
-
-# Basic Controls (Inside UI):
-# ENTER      : Play track / Enter directory
-# TAB        : Switch between file browser (left) and playlist (right)
-# a          : Add track/folder to playlist
-# s          : Stop
-# n / b      : Next / Previous track
-# < / >      : Volume down / up
-# q          : Detach (Close UI, music keeps playing)
-# Q          : Quit (Kills the server and the music)
-
-# # CLI Flags:
-# mocp -i    : Show current song info
-# mocp -x    : Kill the background server
+yay -S --noconfirm timg
 
 
 # Usage for timg
