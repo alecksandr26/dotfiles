@@ -390,6 +390,31 @@ END_COMMENT
 # https://superuser.com/questions/1424478/can-i-hide-native-tabs-at-the-top-of-firefox
 # and install your userChrome.css in the dot files...
 
+### Step 0: Open Firefox config
+: <<'END_COMMENT'
+```bash
+# 1. Type in address bar:   about:config
+# 2. Accept warning
+# 3. Use the search bar to find each pref below
+```
+END_COMMENT
+
+### Only 4 small‑number tweaks (RAM‑light)
+: <<'END_COMMENT'
+```bash
+# 1. Reduce content processes (biggest win)
+dom.ipc.processCount = 3
+
+# 2. Tiny in‑RAM cache (in kilobytes)
+browser.cache.memory.capacity = 8192
+
+# 3. Tiny disk cache (in kilobytes)
+browser.cache.disk.capacity = 15000
+
+# 4. Free RAM when minimized (Windows‑friendly)
+config.trim_on_minimize = true
+```
+END_COMMENT
 
 # mypaint fix patches:
 # https://github.com/wobbol/mypaint/commit/3b682d5898f4a6b709a2cd1a4d2b1b9288277cd6
